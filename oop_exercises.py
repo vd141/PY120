@@ -19,6 +19,10 @@ class RunningShoe:
 
 RunningShoe('Saucony', 'Triumph', 'Blue')
 
+'''
+in 2 different ways, print the name of a class Foo without hardcoding it 
+'''
+
 class Foo:
     def __init__(self):
         print(type(self).__name__)
