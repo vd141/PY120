@@ -51,6 +51,10 @@ class Car:
         print(f'The car is being sprayed {color}!')
         self.__color = color
 
+    @staticmethod
+    def driver_message(sentence):
+        print(f'VROOM VROOM {sentence}')
+
 # toyota = Car('Crosstrek', 2025, 'Gray')
 # toyota.engine_on()
 # toyota.accelerate(35)
@@ -109,7 +113,9 @@ class Person:
 # character = Person('Da5id', 'Meier')
 # # ValueError: Name must be alphabetic.
 
-friend = Person('Lynn', 'Blake')
-print(friend.full_name)             # Lynn Blake
-friend.full_name = ('Lynn', 'Blake-John')
-# ValueError: Name must be alphabetic.
+# friend = Person('Lynn', 'Blake')
+# print(friend.full_name)             # Lynn Blake
+# friend.full_name = ('Lynn', 'Blake-John')
+# # ValueError: Name must be alphabetic.
+
+subaru = Car.driver_message('hihi hehe')
