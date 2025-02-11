@@ -7,10 +7,15 @@ class Candidate:
 
     a candidate object can use the in-place augmented assignment addition operator
     to add to the count of existing Candidate objects
+        - create a class variable to keep track of total class instances
+        - create a class method to return class instance total
+        - create a class dict to track occurences of each unique class instance
 
     it can also use the in-place augmented assignment addition operator to add to the count
     of equal candidate objects
     '''
+
+    counter = 0
     
     def __init__(self, full_name):
         self.__name = full_name
@@ -29,9 +34,23 @@ class Candidate:
     def __repr__(self):
         return f'Candidate({repr(self.name)})'
     
+    @classmethod
+    def instance_count(cls):
+        return cls.counter
+
+    @classmethod
+    def __iadd__(cls, addend):
+        Candidate.counter += addend
+    
 mike_jones = Candidate('Mike Jones')
+susan_dore = Candidate('Susan Dore')
+kim_waters = Candidate('Kim Waters')
 print(mike_jones)
 print(repr(mike_jones))
+mike_jones += 3
+# mike_jones += 1
+print(Candidate.instance_count())
+
 
 class Election:
     '''
@@ -46,9 +65,9 @@ class Election:
     '''
     pass
 
-# mike_jones = Candidate('Mike Jones')
-# susan_dore = Candidate('Susan Dore')
-# kim_waters = Candidate('Kim Waters')
+mike_jones = Candidate('Mike Jones')
+susan_dore = Candidate('Susan Dore')
+kim_waters = Candidate('Kim Waters')
 
 # candidates = {
 #     mike_jones,
