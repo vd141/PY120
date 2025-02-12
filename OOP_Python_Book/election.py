@@ -24,14 +24,14 @@ class Candidate:
 
     
     def __init__(self, full_name):
-        self.__name = full_name
+        self.name = full_name
 
     @property
     def name(self):
         return self.__full_name
     
     @name.setter
-    def __name(self, full_name):
+    def name(self, full_name):
         self.__full_name = full_name
 
     def __str__(self):
