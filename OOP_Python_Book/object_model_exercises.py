@@ -1,31 +1,40 @@
-#  init file
 '''
-defines a class and creates two objects from that class
+define a class and create two objects from that class
 
 class should have at least one instance variable that gets initialized by the
 initializer
 
-create a class for a running shoe
-    - instance variable will be the color
 '''
 
-class RunningShoe:
-    def __init__(self, brand, model, color):
-        self.brand = brand
-        self.model = model
-        self.color = color
-        type_name = type(self).__name__
-        print(f'I am a {self.brand} {self.model} {type_name} in {self.color}.')
+class Bird:
+    def __init__(self):
+        self._flies = True
 
-RunningShoe('Saucony', 'Triumph', 'Blue')
+    @property
+    def flies(self):
+        return self._flies
+    
+class Flamingo(Bird):
+    def __init__(self):
+        self._flies = False
+
+turkey_vulture = Bird()
+pigeon = Bird()
+
+# print(turkey_vulture.flies)
+
+flamingo = Flamingo()
+print(flamingo.flies)
 
 '''
-in 2 different ways, print the name of a class Foo without hardcoding it 
+given a Foo object, what are two different ways to print 'I am a Foo object'
+without hardcoding Foo
 '''
 
 class Foo:
     def __init__(self):
-        print(type(self).__name__)
-        print(self.__class__.__name__)
+        pass
 
-Foo()
+a = Foo()
+print(type(a).__name__)
+print(a.__class__.__name__)
