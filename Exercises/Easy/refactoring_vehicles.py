@@ -21,8 +21,9 @@ class Motorcycle(Vehicle):
 
 
 class Truck(Vehicle):
-    def __init__(self, make, model):
+    def __init__(self, make, model, payload):
         super().__init__(make, model)
+        self.payload = payload
         self.wheels = 6
 
 toyota = Car('toyota', 'venza')
@@ -31,8 +32,8 @@ print(toyota.make, toyota.model, toyota.get_wheels())
 triumph = Motorcycle('triumph', 'detroit')
 print(triumph.make, triumph.model, triumph.get_wheels())
 
-f150 = Truck('ford', 'f150')
-print(f150.make, f150.model, f150.get_wheels())
+f150 = Truck('ford', 'f150', 'hay')
+print(f150.make, f150.model, f150.get_wheels(), f150.payload)
 
 
 '''
