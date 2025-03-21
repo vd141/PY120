@@ -23,7 +23,8 @@ pet class will have a type and name attributes
 owner class will have name, iist of adopted pets, and pet count attributes
 
 shelter adopt method adds pet to owner's list
-shelter print adoptions method accesses owner class's name and list 
+shelter print adoptions method accesses owner class's name and list
+shelter keeps track of owner name and number of adoptions in a dict
 '''
 
 class Pet:
@@ -41,7 +42,7 @@ class Pet:
 
     @property
     def name(self):
-        return self.__qualname__
+        return self._name
     
     @name.setter
     def name(self, name):
@@ -77,7 +78,38 @@ class Owner:
     def pet_count(self, count):
         self._pet_count = count
 
+    def number_of_pets(self):
+        return len(self.pets)
 
+class Shelter:
+    def __init__(self):
+        self._record = {}
+        self._available = []
+
+    def adopt(self, owner, pet):
+        self._record[owner] = self._record.get(owner, 0) + 1
+        owner.pets = pet
+
+    def print_adoptions(self):
+        for owner in self._record:
+            print(f'{owner.name} has adopted the following pets:')
+            for pet in owner.pets:
+                print(f'a {pet.type} named {pet.name}.')
+
+    def take_in(self, pet):
+        self._available.append(pet)
+        print(f'The shelter has taken in {pet.name}, a {pet.type}.')
+
+    def display_available(self):
+        print('The Animal Shelter has the following unadopted pets:')
+
+        for pet in self._available:
+            print(f'a {pet.type} named {pet.name}')
+
+    def print_current_capacity(self):
+        print(f'The Animal shelter has {len(self._available)} unadopted pets.')
+
+    
 
 cocoa   = Pet('cat', 'Cocoa')
 cheddar = Pet('cat', 'Cheddar')
@@ -86,21 +118,55 @@ kennedy = Pet('dog', 'Kennedy')
 sweetie = Pet('parakeet', 'Sweetie Pie')
 molly   = Pet('dog', 'Molly')
 chester = Pet('fish', 'Chester')
+jack    = Pet('cat', 'Jack')
 
-# phanson = Owner('P Hanson')
-# bholmes = Owner('B Holmes')
+phanson = Owner('P Hanson')
+bholmes = Owner('B Holmes')
+vdinh = Owner('V Dinh')
 
-# shelter = Shelter()
-# shelter.adopt(phanson, cocoa)
-# shelter.adopt(phanson, cheddar)
-# shelter.adopt(phanson, darwin)
-# shelter.adopt(bholmes, kennedy)
-# shelter.adopt(bholmes, sweetie)
-# shelter.adopt(bholmes, molly)
-# shelter.adopt(bholmes, chester)
+shelter = Shelter()
+shelter.adopt(phanson, cocoa)
+shelter.adopt(phanson, cheddar)
+shelter.adopt(phanson, darwin)
+shelter.adopt(bholmes, kennedy)
+shelter.adopt(bholmes, sweetie)
+shelter.adopt(bholmes, molly)
+shelter.adopt(bholmes, chester)
+shelter.adopt(vdinh, jack)
 
-# shelter.print_adoptions()
-# print(f"{phanson.name} has {phanson.number_of_pets()} "
-#       "adopted pets.")
-# print(f"{bholmes.name} has {bholmes.number_of_pets()} "
-#       "adopted pets.")
+print(phanson.number_of_pets())
+print(bholmes.number_of_pets())
+
+shelter.print_adoptions()
+print(f"{phanson.name} has {phanson.number_of_pets()} "
+      "adopted pets.")
+print(f"{bholmes.name} has {bholmes.number_of_pets()} "
+      "adopted pets.")
+print(f"{vdinh.name} has {vdinh.number_of_pets()} "
+      "adopted pets.")
+
+'''
+adding unadopted pets to the animal shelter. store pets in a list.
+loop through list to display animals
+
+
+'''
+
+asta = Pet('dog', 'Asta')
+laddie = Pet('dog', 'Laddie')
+fluffy = Pet('cat', 'Fluffy')
+kat = Pet('cat', 'Kat')
+ben = Pet('cat', 'Ben')
+chatterbox = Pet('parakeet', 'Chatterbox')
+bluebell = Pet('parakeet', 'Bluebell')
+
+shelter.take_in(asta)
+shelter.take_in(laddie)
+shelter.take_in(fluffy)
+shelter.take_in(kat)
+shelter.take_in(ben)
+shelter.take_in(chatterbox)
+shelter.take_in(bluebell)
+
+shelter.display_available()
+shelter.print_current_capacity()
