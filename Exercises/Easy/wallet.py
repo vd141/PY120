@@ -7,6 +7,9 @@ class Wallet:
             return Wallet(self.amount + other.amount)
         
         return NotImplemented
+
+    def __str__(self):
+        return f'Wallet with ${self.amount}.'
     
     @property
     def amount(self):
@@ -20,3 +23,4 @@ wallet1 = Wallet(50)
 wallet2 = Wallet(30)
 merged_wallet = wallet1 + wallet2
 print(merged_wallet.amount == 80)       # True
+print(merged_wallet)          # Wallet with $80.
