@@ -1,18 +1,22 @@
-class Person:
+class WalkMixIn:
+    def walk(self):
+        return f'{self.name} {self.gait()} forward'
+
+class Person(WalkMixIn):
     def __init__(self, name):
         self.name = name
 
     def gait(self):
         return "strolls"
 
-class Cat:
+class Cat(WalkMixIn):
     def __init__(self, name):
         self.name = name
 
     def gait(self):
         return "saunters"
 
-class Cheetah:
+class Cheetah(WalkMixIn):
     def __init__(self, name):
         self.name = name
 
@@ -22,8 +26,11 @@ class Cheetah:
 '''
 update class definitions to enable the following code
 
-
+can use a Walker mixin that includes a walk() method. the walk method calls each
+class's gait() method to create the output string
 '''
+
+
 mike = Person("Mike")
 print(mike.walk())  # Expected: "Mike strolls forward"
 
