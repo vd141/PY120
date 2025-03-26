@@ -4,87 +4,85 @@ class CircularBuffer:
 
     buffer will store values in an array
 
-    keep track of oldest and second oldest indexes with variables
+    initialized array is empty
 
-    initialized array is full of Nones
-
-
+    oldest value in buffer is always the element at index 0
     '''
     def __init__(self, buffer_length):
-        self._buffer = [None for position in range(buffer_length)]
-        self._length = buffer_length
-        self._oldest_index = buffer_length
+        self._buffer = []
+        self._max_length = buffer_length
+        self._oldest_index = 0
 
     def __str__(self):
         return str(self._buffer)
 
     def put(self, new_value):
         '''
-        append the value to the buffer, pop the value from the front
+        append the value to the buffer, 
+        
+        pop the value from the front if buffer length is currently at initialized length
 
-        update oldest index
-            oldest index starts at = length(buffer)
-            if oldest index is greater than 0, decrement by 1
-            if oldest index is 0, keep at 0
         '''
 
         self._buffer.append(new_value)
-        self._buffer.pop(0)
-        if self._oldest_index > 0:
-            self._oldest_index -= 1
+        if len(self._buffer) > self._max_length:
+            self._buffer.pop(self._oldest_index)
+
 
 
     def get(self):
         '''
-        insert a None
+        if buffer is empty, return None
 
-        return the result of pop(0)
+        otherwise, pop the element at the beginning of the buffer
         '''
 
-        self._buffer.append(None)
-        if self._buffer.count(None) > 1:
-            if all(item == None for item in self._buffer):
-            return self._buffer.pop(self._oldest_index)
-        return self._buffer.pop(0)
+        if len(self._buffer) == 0:
+            return None
+        return self._buffer.pop(self._oldest_index)
         
 
 buffer = CircularBuffer(3)
 
 print(buffer.get() is None)          # True
 
+
 buffer.put(1)
 buffer.put(2)
+print(buffer)
 print(buffer.get() == 1)             # True
+print(buffer)
 
-# buffer.put(3)
-# buffer.put(4)
-# print(buffer.get() == 2)             # True
+buffer.put(3)
+buffer.put(4)
+print(buffer)
+print(buffer.get() == 2)             # True
 
-# buffer.put(5)
-# buffer.put(6)
-# buffer.put(7)
-# print(buffer.get() == 5)             # True
-# print(buffer.get() == 6)             # True
-# print(buffer.get() == 7)             # True
-# print(buffer.get() is None)          # True
+buffer.put(5)
+buffer.put(6)
+buffer.put(7)
+print(buffer.get() == 5)             # True
+print(buffer.get() == 6)             # True
+print(buffer.get() == 7)             # True
+print(buffer.get() is None)          # True
 
-# buffer2 = CircularBuffer(4)
+buffer2 = CircularBuffer(4)
 
-# print(buffer2.get() is None)         # True
+print(buffer2.get() is None)         # True
 
-# buffer2.put(1)
-# buffer2.put(2)
-# print(buffer2.get() == 1)            # True
+buffer2.put(1)
+buffer2.put(2)
+print(buffer2.get() == 1)            # True
 
-# buffer2.put(3)
-# buffer2.put(4)
-# print(buffer2.get() == 2)            # True
+buffer2.put(3)
+buffer2.put(4)
+print(buffer2.get() == 2)            # True
 
-# buffer2.put(5)
-# buffer2.put(6)
-# buffer2.put(7)
-# print(buffer2.get() == 4)            # True
-# print(buffer2.get() == 5)            # True
-# print(buffer2.get() == 6)            # True
-# print(buffer2.get() == 7)            # True
-# print(buffer2.get() is None)         # True
+buffer2.put(5)
+buffer2.put(6)
+buffer2.put(7)
+print(buffer2.get() == 4)            # True
+print(buffer2.get() == 5)            # True
+print(buffer2.get() == 6)            # True
+print(buffer2.get() == 7)            # True
+print(buffer2.get() is None)         # True
