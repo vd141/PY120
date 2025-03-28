@@ -41,15 +41,18 @@ class Deck:
         create a list of cards
         '''
 
-        self._deck = [Card(rank, suit) for rank in Deck.RANKS
-                                       for suit in Deck.SUITS]
+        self._deck = [Card(rank, suit) 
+                      for rank in Deck.RANKS
+                      for suit in Deck.SUITS]
         random.shuffle(self._deck)
         
     def __str__(self):
         return str([str(card) for card in self._deck])
 
     def draw(self):
-        return self._deck[0]
+        if not self._deck:
+            self.__init__()
+        return self._deck.pop(0)
 
 deck = Deck()
 print(deck)
