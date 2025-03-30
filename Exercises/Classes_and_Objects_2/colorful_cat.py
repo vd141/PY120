@@ -5,8 +5,7 @@ class constant to define the color
 '''
 
 class Cat:
-    _COLOR = 'pink'
-
+    COLOR = 'blue'
     def __init__(self, name):
         self._name = name
 
@@ -14,9 +13,10 @@ class Cat:
     def name(self):
         return self._name
 
-    def greeting(self):
-        print(f'Hello! My name is {self.name} and I\'m a {Cat._COLOR} cat!')
+    def greet(self):
+        print(f'Hello! My name is {self.name} and I\'m a {Cat.COLOR} cat!')
 
-sophie = Cat('Sophie')
+kitty = Cat('Sophie')
+kitty.greet()
 
-sophie.greeting()
+# example output: Hello! My name is Sophie and I'm a purple cat!

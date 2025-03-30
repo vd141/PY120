@@ -22,3 +22,9 @@ kitty = Cat('Sophie')
 print(kitty.name)             # Sophie
 kitty.rename('Chloe')
 print(kitty.name)             # Chloe
+
+# Comments show expected output
+kitty = Cat('Sophie')
+print(kitty.name)             # Sophie
+kitty.rename('Chloe')
+print(kitty.name)             # Chloe

@@ -11,7 +11,7 @@ class Cat:
     @classmethod
     def total(cls):
         print(cls._count)
-
+    
 Cat.total()         # 0
 
 kitty1 = Cat()
