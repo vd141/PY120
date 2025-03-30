@@ -10,7 +10,16 @@ class Vehicle:
 
 class Truck(Vehicle):
     def start_engine(self, speed):
-        return super().start_engine() + f' Drive {speed}, please!'
+        self.speed = speed
+        return super().start_engine() + f' Drive {self.speed}, please!'
+    
+    @property
+    def speed(self):
+        return self._speed
+    
+    @speed.setter
+    def speed(self, speed):
+        self._speed = speed
 
 # Comments show expected output
 truck1 = Truck()

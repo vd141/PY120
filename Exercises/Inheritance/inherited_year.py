@@ -11,10 +11,12 @@ class Vehicle:
         return self._year
     
 class Truck(Vehicle):
-    pass
+    def __init(self, year):
+        super().__init__(year)
 
 class Car(Vehicle):
-    pass
+    def __init(self, year):
+        super().__init__(year)
 
 # Comments show expected output
 truck1 = Truck(1994)
