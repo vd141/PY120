@@ -18,3 +18,7 @@ print(bake)
 print("Hello")                # <class 'str'>
 print(5)                      # <class 'int'>
 print([1, 2, 3])              # <class 'list'>
+
+print(type('Hello'))
+print(type(5))
+print(type([1, 2, 3]))
