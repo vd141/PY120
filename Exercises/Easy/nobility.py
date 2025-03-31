@@ -1,25 +1,7 @@
 class WalkMixIn:
     def walk(self):
-        if type(self) == Noble:
-            return f'{self.title} {self.name} {self.gait()} forward'
         return f'{self.name} {self.gait()} forward'
 
-class Noble(WalkMixIn):
-    def __init__(self, name, title):
-        self._name = name
-        self._title = title
-
-    @property
-    def name(self):
-        return self._name
-    
-    @property
-    def title(self):
-        return self._title
-    
-    def gait(self):
-        return 'struts'
-    
 class Person(WalkMixIn):
     def __init__(self, name):
         self.name = name
@@ -40,23 +22,26 @@ class Cheetah(WalkMixIn):
 
     def gait(self):
         return "runs"
+
+class Noble(WalkMixIn):
+    '''
+    nobility should be able to display name and title in walk function
+
+    nobility name function should only return the name
+
+    walk function in mixin currently uses name to display full name
+
+    nobility can append the title to the name in walkmixin
+    '''
+    def __init__(self, name, title):
+        self.name = name
+        self.title = title
+
+    def walk(self):
+        return f'{self.title} {super().walk()}'
     
-'''
-update class definitions to enable the following code
-
-can use a Walker mixin that includes a walk() method. the walk method calls each
-class's gait() method to create the output string
-'''
-
-
-mike = Person("Mike")
-print(mike.walk())  # Expected: "Mike strolls forward"
-
-kitty = Cat("Kitty")
-print(kitty.walk())  # Expected: "Kitty saunters forward"
-
-flash = Cheetah("Flash")
-print(flash.walk())  # Expected: "Flash runs forward"
+    def gait(self):
+        return 'struts'
 
 byron = Noble("Byron", "Lord")
 print(byron.walk())  # "Lord Byron struts forward"
