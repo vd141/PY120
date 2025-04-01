@@ -26,8 +26,11 @@ class Card:
     def __str__(self):
         return f'{self.rank} of {self.suit}'
     
-    # def __eq__(self):
-    #     return self
+    def __eq__(self, other):
+        if isinstance(other, Card):
+            return (self.value, self.rank) == (other.value, other.rank)
+        
+        return NotImplemented
 
 
 cards = [Card(2, 'Hearts'),
