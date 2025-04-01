@@ -1,4 +1,5 @@
 import random
+import math
 
 '''
 create an OOP number guessing class for numbers in the range from 1 to 100,
@@ -70,9 +71,11 @@ class GuessingGame:
     LOWER_BOUND = 1
     UPPER_BOUND = 100
 
-    def __init__(self):
-        self._guesses = GuessingGame.GUESSES
-        self._magic_number = random.randint(GuessingGame.LOWER_BOUND, GuessingGame.UPPER_BOUND)
+    def __init__(self, lower_bound, upper_bound):
+        self._lower_bound = lower_bound
+        self._upper_bound = upper_bound
+        self._guesses = int(math.log2(upper_bound - lower_bound + 1)) + 1
+        self._magic_number = random.randint(lower_bound, upper_bound)
 
     def play(self):
         '''
@@ -96,14 +99,13 @@ class GuessingGame:
             
     def get_guess(self):
         while True:
-            guess = int(input(f'Enter a number between {GuessingGame.LOWER_BOUND} '
-                          f'and {GuessingGame.UPPER_BOUND}: '))
-            if GuessingGame._is_valid_guess(guess):
+            guess = int(input(f'Enter a number between {self._lower_bound} '
+                          f'and {self._upper_bound}: '))
+            if self._is_valid_guess(guess):
                 return guess
 
-    @classmethod
-    def _is_valid_guess(cls, guess):
-        if not cls.LOWER_BOUND <= guess <= cls.UPPER_BOUND:
+    def _is_valid_guess(self, guess):
+        if not self._lower_bound <= guess <= self._upper_bound:
             print('Invalid guess. ', end='')
             return False
         return True
@@ -119,5 +121,5 @@ class GuessingGame:
 
 
 
-game = GuessingGame()
+game = GuessingGame(501, 1500)
 game.play()
