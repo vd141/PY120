@@ -17,6 +17,13 @@ class Card:
         'Ace': 14,
     }
 
+    SUITS = {
+        'Spades': 400,
+        'Hearts': 300,
+        'Clubs': 200,
+        'Diamonds': 100,
+    }
+
     def __init__(self, rank, suit):
         self.rank = rank
         self.suit = suit
@@ -24,13 +31,21 @@ class Card:
 
     def __lt__(self, other):
         if isinstance(other, Card):
+            if self.value == other.value:
+                self._adjusted_value = Card.SUITS.get(self.suit) + self.value
+                other._adjusted_value = Card.SUITS.get(other.suit) + self.value
+                return self._adjusted_value < other._adjusted_value
             return self.value < other.value
         
         return NotImplemented
     
     def __gt__(self, other):
         if isinstance(other, Card):
-            return self.value > other.value
+            if self.value == other.value:
+                self._adjusted_value = Card.SUITS.get(self.suit) + self.value
+                other._adjusted_value = Card.SUITS.get(other.suit) + self.value
+                return self._adjusted_value > other._adjusted_value
+        return self.value > other.value
         
         return NotImplemented
     
@@ -76,3 +91,10 @@ cards = [Card(8, 'Diamonds'),
          Card(8, 'Spades')]
 print(min(cards).rank == 8)                        # True
 print(max(cards).rank == 8)                        # True
+print(min(cards).suit == 'Diamonds')
+print(min(cards).suit)
+print(cards[0]._adjusted_value)
+print(cards[1]._adjusted_value)
+print(cards[2]._adjusted_value)
+cards.sort()
+print([str(card) for card in cards])
