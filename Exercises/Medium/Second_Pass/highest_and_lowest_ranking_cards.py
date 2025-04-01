@@ -1,4 +1,15 @@
 class Card:
+    '''
+    further exploration:
+
+    given all equal card ranks, Spades > Hearts > Clubs > Diamonds
+
+    give spades a value of 400
+    hearts = 300
+    clubs = 200
+    diamonds = 100
+    
+    '''
     VALUES = {
         'Jack': 11,
         'Queen': 12,
