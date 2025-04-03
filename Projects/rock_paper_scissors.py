@@ -6,30 +6,49 @@ import random
 class Player:
     CHOICES = ('rock', 'paper', 'scissors')
 
-    def __init__(self, player_type):
-        # maybe a "name"? what about a "move"?
-        self._player_type = player_type.lower()
-        self.player_choice = None
+    def __init__(self):
+        pass
 
-    def _is_human(self):
-        return self._player_type == 'human'
+class Computer(Player):
+    def __init__(self):
+        self.move = None
 
     def choose(self):
-        if self._is_human():
-            while True:
-                prompt = 'Select (rock), (paper), or (scissors): '
-                choice = input(prompt)
-                if choice in Player.CHOICES:
-                    break
-                print('Invalid choice. ', end='')
-            self.player_choice = choice
-        else:
-            self.player_choice = random.choice(Player.CHOICES)
+        self.move = random.choice(Player.CHOICES)
+
+    @property
+    def move(self):
+        return self._move
+    
+    @move.setter
+    def move(self, move):
+        self._move = move
+
+class Human(Player):
+    def __init__(self):
+        self.move = None
+
+    def choose(self):
+        while True:
+            prompt = 'Select (rock), (paper), or (scissors): '
+            choice = input(prompt)
+            if choice in Player.CHOICES:
+                break
+            print('Invalid choice. ', end='')
+        self.move = choice
+
+    @property
+    def move(self):
+        return self._move
+    
+    @move.setter
+    def move(self, move):
+        self._move = move
 
 class RPSGame:
     def __init__(self):
-        self._human = Player('human')
-        self._computer = Player('computer')
+        self._human = Human()
+        self._computer = Computer()
 
     def _display_welcome_message(self):
         print('Welcome to Rock Paper Scissors!')
@@ -41,8 +60,8 @@ class RPSGame:
         '''
         compare player choice to computer choice
         '''
-        human_move = self._human.player_choice
-        computer_move = self._computer.player_choice
+        human_move = self._human.move
+        computer_move = self._computer.move
         print(f'You chose {human_move}.')
         print(f'The computer chose {computer_move}.')
 
