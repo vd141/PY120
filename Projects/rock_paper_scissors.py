@@ -12,6 +12,7 @@ class Player:
 
     def __init__(self):
         self.move = None
+        self.score = 0
 
 class Computer(Player):
     '''
@@ -43,6 +44,15 @@ class Computer(Player):
         '''
         self._move = move
 
+    @property
+    def score(self):
+        return self._score
+    
+    @score.setter
+    def score(self, score):
+        self._score = score
+
+    
 class Human(Player):
     '''
     huamn player definition
@@ -102,11 +112,19 @@ class RPSGame:
         print(f'The computer chose {self._computer.move}.')
 
         if self._human_wins():
+            self._human.score += 1
             print('You win!')
+            self._display_score()
         elif self._computer_wins():
+            self._computer.score += 1
             print('Computer wins!')
+            self._display_score()
         else:
             print('It\'s a tie!')
+    
+    def _display_score(self):
+        print(f'Your score is: {self._human.score}, '
+              f'Computer score is: {self._computer.score}')
 
     def _human_wins(self):
         human_move = self._human.move
@@ -127,6 +145,9 @@ class RPSGame:
     def _play_again(self):
         prompt = 'Would you like to play again? y/n: '
         return input(prompt).lower().startswith('y')
+    
+    def _reached_five(self):
+        return 5 in (self._computer.score, self._human.score)
 
     def play(self):
         '''
@@ -138,8 +159,17 @@ class RPSGame:
             self._human.choose()
             self._computer.choose()
             self._display_winner()
-            if not self._play_again():
+            if self._reached_five() or not self._play_again():
                 break
         self._display_goodbye_message()
 
 RPSGame().play()
+
+'''
+Keeping score: class or state?
+    - a score doesn't need to do anything.
+    - we just need to access the score to display it, update it after each round
+      and check it when deciding to end the game
+    - each player has its own score -> we can make the score an attribute of the
+      player class
+'''
