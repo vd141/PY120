@@ -1,34 +1,62 @@
 '''
 OOP RPS
 '''
+
 import random
 
 class Player:
+    '''
+    defines game choices
+    '''
     CHOICES = ('rock', 'paper', 'scissors')
 
     def __init__(self):
-        pass
-
-class Computer(Player):
-    def __init__(self):
         self.move = None
 
+class Computer(Player):
+    '''
+    Computer player definition
+    '''
+    def __init__(self):
+        '''
+        initialize computer move state
+        '''
+        super().__init__()
+
     def choose(self):
+        '''
+        selects a random choice
+        '''
         self.move = random.choice(Player.CHOICES)
 
     @property
     def move(self):
+        '''
+        returns the _move attribute
+        '''
         return self._move
-    
+
     @move.setter
     def move(self, move):
+        '''
+        sets the _move attribute
+        '''
         self._move = move
 
 class Human(Player):
+    '''
+    huamn player definition
+    '''
     def __init__(self):
-        self.move = None
+        '''
+        initialize human move state
+        '''
+        super().__init__()
 
     def choose(self):
+        '''
+        prompts the user to make a choice (must be a valid choice)
+        '''
         while True:
             prompt = 'Select (rock), (paper), or (scissors): '
             choice = input(prompt)
@@ -39,13 +67,22 @@ class Human(Player):
 
     @property
     def move(self):
+        '''
+        returns the _move attribute
+        '''
         return self._move
-    
+
     @move.setter
     def move(self, move):
+        '''
+        sets the _move attribute
+        '''
         self._move = move
 
 class RPSGame:
+    '''
+    controls game flow and collaborates with Human and Computer Players
+    '''
     def __init__(self):
         self._human = Human()
         self._computer = Computer()
@@ -60,33 +97,41 @@ class RPSGame:
         '''
         compare player choice to computer choice
         '''
-        human_move = self._human.move
-        computer_move = self._computer.move
-        print(f'You chose {human_move}.')
-        print(f'The computer chose {computer_move}.')
 
-        # player wins
-        if ((human_move == 'rock' and computer_move == 'scissors') or
-            (human_move == 'paper' and computer_move == 'rock') or
-            (human_move == 'scissors' and computer_move == 'paper')):
-            
+        print(f'You chose {self._human.move}.')
+        print(f'The computer chose {self._computer.move}.')
+
+        if self._human_wins():
             print('You win!')
-        # computer wins
-        elif ((computer_move == 'rock' and human_move == 'scissors') or
-            (computer_move == 'paper' and human_move == 'rock') or
-            (computer_move == 'scissors' and human_move == 'paper')):
-
+        elif self._computer_wins():
             print('Computer wins!')
-        # tie
         else:
             print('It\'s a tie!')
+
+    def _human_wins(self):
+        human_move = self._human.move
+        computer_move = self._computer.move
+
+        return ((human_move == 'rock' and computer_move == 'scissors') or
+            (human_move == 'paper' and computer_move == 'rock') or
+            (human_move == 'scissors' and computer_move == 'paper'))
+
+    def _computer_wins(self):
+        human_move = self._human.move
+        computer_move = self._computer.move
+
+        return ((computer_move == 'rock' and human_move == 'scissors') or
+            (computer_move == 'paper' and human_move == 'rock') or
+            (computer_move == 'scissors' and human_move == 'paper'))
 
     def _play_again(self):
         prompt = 'Would you like to play again? y/n: '
         return input(prompt).lower().startswith('y')
-         
 
     def play(self):
+        '''
+        dictates game flow
+        '''
         self._display_welcome_message()
 
         while True:
