@@ -8,7 +8,7 @@ class Player:
     '''
     defines game choices
     '''
-    CHOICES = ('rock', 'paper', 'scissors')
+    CHOICES = ('rock', 'paper', 'scissors', 'lizard', 'spock')
 
     def __init__(self):
         self.move = None
@@ -68,7 +68,7 @@ class Human(Player):
         prompts the user to make a choice (must be a valid choice)
         '''
         while True:
-            prompt = 'Select (rock), (paper), or (scissors): '
+            prompt = 'Select (rock), (paper), (scissors), (lizard), or (spock): '
             choice = input(prompt)
             if choice in Player.CHOICES:
                 break
@@ -127,12 +127,32 @@ class RPSGame:
               f'Computer score is: {self._computer.score}')
 
     def _human_wins(self):
+        '''
+        scissors beats 
+        paper beats 
+        rock beats 
+        lizard beats 
+        spock beats
+        scissors beats
+        lizard beats
+        paper beats
+        spock beats
+        rock beats
+        scissors
+        '''
         human_move = self._human.move
         computer_move = self._computer.move
 
         return ((human_move == 'rock' and computer_move == 'scissors') or
             (human_move == 'paper' and computer_move == 'rock') or
-            (human_move == 'scissors' and computer_move == 'paper'))
+            (human_move == 'scissors' and computer_move == 'paper') or
+            (human_move == 'rock' and computer_move == 'lizard') or
+            (human_move == 'lizard' and computer_move == 'spock') or
+            (human_move == 'spock' and computer_move == 'scissors') or
+            (human_move == 'scissors' and computer_move == 'lizard') or
+            (human_move == 'lizard' and computer_move == 'paper') or
+            (human_move == 'paper' and computer_move == 'spock') or
+            (human_move == 'spock' and computer_move == 'rock'))
 
     def _computer_wins(self):
         human_move = self._human.move
@@ -140,7 +160,14 @@ class RPSGame:
 
         return ((computer_move == 'rock' and human_move == 'scissors') or
             (computer_move == 'paper' and human_move == 'rock') or
-            (computer_move == 'scissors' and human_move == 'paper'))
+            (computer_move == 'scissors' and human_move == 'paper') or
+            (computer_move == 'rock' and human_move == 'lizard') or
+            (computer_move == 'lizard' and human_move == 'spock') or
+            (computer_move == 'spock' and human_move == 'scissors') or
+            (computer_move == 'scissors' and human_move == 'lizard') or
+            (computer_move == 'lizard' and human_move == 'paper') or
+            (computer_move == 'paper' and human_move == 'spock') or
+            (computer_move == 'spock' and human_move == 'rock'))
 
     def _play_again(self):
         prompt = 'Would you like to play again? y/n: '
@@ -172,4 +199,11 @@ Keeping score: class or state?
       and check it when deciding to end the game
     - each player has its own score -> we can make the score an attribute of the
       player class
+'''
+
+'''
+Adding lizard and spock:
+    - add to the player class
+    - need to update winning logic
+    - 
 '''
