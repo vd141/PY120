@@ -115,11 +115,17 @@ class Vector:
     
     def __rmul__(self, other):
         if not isinstance(other, int):
+        if not isinstance(other, int):
             return NotImplemented
         
         return Vector(self.x * other, self.y * other)
+        return Vector(self.x * other, self.y * other)
 
 
+# print(Vector(3, 2) + Vector(5, 12))   # Vector(8, 14)
+# print(Vector(5, 12) - Vector(3, 2))   # Vector(2, 10)
+# print(Vector(5, 12) * 2)              # Vector(10, 24)
+# print(3 * Vector(5, 12))              # Vector(15, 36)
 # print(Vector(3, 2) + Vector(5, 12))   # Vector(8, 14)
 # print(Vector(5, 12) - Vector(3, 2))   # Vector(2, 10)
 # print(Vector(5, 12) * 2)              # Vector(10, 24)
@@ -128,7 +134,12 @@ class Vector:
 # my_vector = Vector(5, 7)
 # my_vector += Vector(3, 9)
 # print(my_vector)                      # Vector(8, 16)
+# my_vector = Vector(5, 7)
+# my_vector += Vector(3, 9)
+# print(my_vector)                      # Vector(8, 16)
 
+# my_vector -= Vector(1, 7)
+# print(my_vector)                      # Vector(7, 9)
 # my_vector -= Vector(1, 7)
 # print(my_vector)                      # Vector(7, 9)
 
