@@ -126,3 +126,7 @@ def ask_forgiveness_never_permission(numbers):
 
 print(look_before_you_leap(numbers))
 print(ask_forgiveness_never_permission(numbers))
+
+'''
+10
+'''
