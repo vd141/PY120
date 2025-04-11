@@ -90,10 +90,56 @@ class Greeting:
 
 class Hello(Greeting):
     def hi(self):
-        self.greet('Hi')
+        self.greet('Hello')
+
+    @classmethod
+    def hi(cls):
+        Greeting().greet('Hi')
 
 class Goodbye(Greeting):
     def bye(self):
         self.greet('Goodbye')
 
 Hello().hi()
+
+'''
+6
+
+
+'''
+class Cat:
+    def __init__(self, type):
+        self.type = type
+
+    def __str__(self):
+        return f'I am a {self.type}'
+
+print(Cat('hairball'))
+# <__main__.Cat object at 0x10695eb10>
+
+'''
+7
+
+What would happen if you ran the following code?
+
+the tv instance will return 
+'Amazon'
+'Omni Fire'
+
+Television.manufacturer will return 'Amazon'
+Television.model() will throw an exception about an unassigned paramter (self)
+'''
+class Television:
+    @classmethod
+    def manufacturer(cls):
+        return 'Amazon'
+
+    def model(self):
+        return 'Omni Fire'
+
+tv = Television()
+print(tv.manufacturer())
+print(tv.model())
+
+print(Television.manufacturer())
+print(Television.model())
