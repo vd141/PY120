@@ -79,8 +79,8 @@ import random
 import os
 
 class PromptMixIn:
-    def prompt(self, message):
-        return f'==> {message}'
+    def prompt(self, *messages):
+        return f'==> {''.join(messages)}'
 
 class Board(PromptMixIn):
     '''
@@ -141,7 +141,7 @@ class Board(PromptMixIn):
 
     def print_template_board(self):
         print(self.prompt('This is the game board. You can pick a position'),
-              ' by entering its number when prompted.')
+              'by entering its number when prompted.')
         for row in Board.TEMPLATE_BOARD:
             print(row)
 
@@ -149,10 +149,14 @@ class Board(PromptMixIn):
         for row in self.playing_board:
             print(row)
 
-    def update_player_board(self, mark, position):
+    def update_player_board(self, marker, position):
         '''
         STUB
         algorithm to update playing board with player's position choice
+
+        look in template for position of selected position
+        get index (row, col) of selected position
+        replace position in the playing_board
         '''
         pass
 
@@ -163,6 +167,7 @@ class Player(PromptMixIn):
     '''
     def __init__(self):
         self.score = 0
+        self.marker = None
         
     @property
     def score(self):
@@ -172,16 +177,26 @@ class Player(PromptMixIn):
     def score(self, other):
         self._score = other
 
+    @property
+    def marker(self):
+        return self._marker
+    
+    @marker.setter
+    def marker(self, other):
+        self._marker = other
+
 class Human(Player):
-    def select_position(self, available):
+    def select_position(self, board):
+        available = board.available_spaces
         while True:
-            choice = int(input(self.prompt(f'Select a position: {available}')))
+            choice = int(input(self.prompt('Please choose an available ',
+                                           f'position: {available}: ')))
             if choice in available:
                 return choice
-            print(self.prompt('Please choose an available position.', end=''))
 
 class Computer(Player):
-    def select_position(self, available):
+    def select_position(self, board):
+        available = board.available_spaces
         return random.choices(available)
 
 
@@ -230,13 +245,25 @@ class TTTGame(PromptMixIn):
         p1, p2 = self._randomly_select_starter()
         game_board = Board()
         game_board.print_template_board()
+        while True:
+            p1.select_position(game_board)
+            p2.select_position(game_board)
 
     def _randomly_select_starter(self):
+        '''
+        selects a human or computer instance as the p1/p2 and sets marker for
+        each player 'O' for starter, 'X' for p2
+        '''
         players = [Human(), Computer()]
         first_player = random.choices(players)[0]
-        second_player = [player for player in players if player is not first_player][0]
-        print(self.prompt(f'First player is {first_player.__class__.__name__}'))
-        print(self.prompt(f'Second player is {second_player.__class__.__name__}'))
+        second_player = [player for player in players if 
+                         player is not first_player][0]
+        first_player.marker, second_player.marker = 'O', 'X'
+        print(self.prompt(f'First player is {first_player.__class__.__name__}: '
+                          f'{first_player.marker}'))
+        print(self.prompt('Second player is ',
+                          f'{second_player.__class__.__name__}: '
+                          f'{second_player.marker}'))
         return first_player, second_player
 
     def _display_welcome_message(self):
