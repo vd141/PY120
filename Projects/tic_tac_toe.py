@@ -139,7 +139,7 @@ class Board(PromptMixIn):
     def playing_board(self, other):
         self._player_board = other
 
-    def print_template_board(self):
+    def print_template(self):
         print(self.prompt('This is the game board. You can pick a position'),
               'by entering its number when prompted.')
         for row in Board.TEMPLATE_BOARD:
@@ -189,10 +189,13 @@ class Human(Player):
     def select_position(self, board):
         available = board.available_spaces
         while True:
-            choice = int(input(self.prompt('Please choose an available ',
-                                           f'position: {available}: ')))
-            if choice in available:
-                return choice
+            choice = input(self.prompt('Please choose an available ',
+                                           f'position: {available}: '))
+            try:
+                if int(choice) in available:
+                    return int(choice)
+            except ValueError as e:
+                print(self.prompt(f'{e}. Input must be an available integer!'))
 
 class Computer(Player):
     def select_position(self, board):
@@ -244,10 +247,13 @@ class TTTGame(PromptMixIn):
         self._display_welcome_message()
         p1, p2 = self._randomly_select_starter()
         game_board = Board()
-        game_board.print_template_board()
+        game_board.print_template()
         while True:
-            p1.select_position(game_board)
-            p2.select_position(game_board)
+            p1_choice = p1.select_position(game_board)
+            p2_choice = p2.select_position(game_board)
+
+            if p1_choice and p2_choice:
+                break
 
     def _randomly_select_starter(self):
         '''
