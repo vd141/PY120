@@ -113,7 +113,18 @@ class Board(PromptMixIn):
     def __init__(self):
         self.available_spaces = list(Board.SPACES)
         self.occupied_spaces = list()
-        self.playing_board = Board.EMPTY_BOARD.copy()
+        self.squares = {
+            1: ' ',
+            2: ' ',
+            3: ' ',
+            4: ' ',
+            5: ' ',
+            6: ' ',
+            7: ' ',
+            8: ' ',
+            9: ' ',
+        }
+        self.playing_board = self.update_playing_board()
 
     @property
     def available_spaces(self):
@@ -139,6 +150,15 @@ class Board(PromptMixIn):
     def playing_board(self, other):
         self._player_board = other
 
+    @property
+    def squares(self):
+        return self._squares
+    
+    @squares.setter
+    def squares(self, other):
+        print('I\'ve been modified!')
+        self._squares = other
+
     def print_template(self):
         print(self.prompt('This is the game board. You can pick a position'),
               'by entering its number when prompted.')
@@ -149,7 +169,7 @@ class Board(PromptMixIn):
         for row in self.playing_board:
             print(row)
 
-    def update_player_board(self, marker, position):
+    def update_playing_board(self):
         '''
         STUB
         algorithm to update playing board with player's position choice
@@ -158,7 +178,16 @@ class Board(PromptMixIn):
         get index (row, col) of selected position
         replace position in the playing_board
         '''
-        pass
+        print(self.squares)
+        return [
+            '+-----------------+',
+            f'|  {self.squares[1]}  |  {self.squares[2]}  |  {self.squares[3]}  |',
+            '+-----------------+',
+            f'|  {self.squares[4]}  |  {self.squares[5]}  |  {self.squares[6]}  |',
+            '+-----------------+',
+            f'|  {self.squares[7]}  |  {self.squares[8]}  |  {self.squares[9]}  |',
+            '+-----------------+'
+        ]
 
 class Player(PromptMixIn):
     '''
@@ -200,7 +229,7 @@ class Human(Player):
 class Computer(Player):
     def select_position(self, board):
         available = board.available_spaces
-        return random.choices(available)
+        return random.choices(available)[0]
 
 
 class TTTGame(PromptMixIn):
@@ -252,8 +281,15 @@ class TTTGame(PromptMixIn):
             p1_choice = p1.select_position(game_board)
             p2_choice = p2.select_position(game_board)
 
+            print(type(p1_choice))
+            game_board.squares[p1_choice] = 'O'
+            game_board.update_playing_board()
+            print(game_board.squares)
+
             if p1_choice and p2_choice:
                 break
+
+        game_board.print_playing_board()
 
     def _randomly_select_starter(self):
         '''
