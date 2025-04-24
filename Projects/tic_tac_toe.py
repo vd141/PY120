@@ -77,6 +77,7 @@ scaffolding
 
 import random
 import os
+import time
 
 class PromptMixIn:
     def prompt(self, *messages):
@@ -124,7 +125,6 @@ class Board(PromptMixIn):
             8: ' ',
             9: ' ',
         }
-        self.playing_board = self.update_playing_board()
 
     @property
     def available_spaces(self):
@@ -156,7 +156,6 @@ class Board(PromptMixIn):
     
     @squares.setter
     def squares(self, other):
-        print('I\'ve been modified!')
         self._squares = other
 
     def print_template(self):
@@ -178,8 +177,7 @@ class Board(PromptMixIn):
         get index (row, col) of selected position
         replace position in the playing_board
         '''
-        print(self.squares)
-        return [
+        self.playing_board = [
             '+-----------------+',
             f'|  {self.squares[1]}  |  {self.squares[2]}  |  {self.squares[3]}  |',
             '+-----------------+',
@@ -197,6 +195,7 @@ class Player(PromptMixIn):
     def __init__(self):
         self.score = 0
         self.marker = None
+        self.positions = set()
         
     @property
     def score(self):
@@ -214,25 +213,53 @@ class Player(PromptMixIn):
     def marker(self, other):
         self._marker = other
 
+    @property
+    def positions(self):
+        return self._positions
+    
+    @positions.setter
+    def positions(self, other):
+        self._positions = other
+
 class Human(Player):
     def select_position(self, board):
         available = board.available_spaces
-        while True:
-            choice = input(self.prompt('Please choose an available ',
-                                           f'position: {available}: '))
+        while available:
             try:
-                if int(choice) in available:
-                    return int(choice)
+                choice = int(input(self.prompt('Please choose an available ',
+                                           f'position: {available}: ')))
+                if choice in available:
+                    available.remove(choice)
+                    print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
+                    self.positions.add(choice)
+                    return choice
             except ValueError as e:
                 print(self.prompt(f'{e}. Input must be an available integer!'))
 
 class Computer(Player):
     def select_position(self, board):
         available = board.available_spaces
-        return random.choices(available)[0]
+        if available:
+            print(self.prompt('Computer deciding...'))
+            time.sleep(2)
+            choice = random.choices(available)[0]
+            available.remove(choice)
+            self.positions.add(choice)
+            print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
+            return choice
 
 
 class TTTGame(PromptMixIn):
+    WINNING_CONDITIONS = [
+            {1, 5, 9},
+            {3, 5, 7},
+            {1, 4, 7},
+            {2, 5, 8},
+            {3, 6, 9},
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9},
+        ]
     '''
     orchestration engine
 
@@ -249,7 +276,7 @@ class TTTGame(PromptMixIn):
         '''
         STUB
         '''
-        pass
+        self.board = Board()
 
     def play(self):
         '''
@@ -277,19 +304,24 @@ class TTTGame(PromptMixIn):
         p1, p2 = self._randomly_select_starter()
         game_board = Board()
         game_board.print_template()
-        while True:
+        time.sleep(4)
+        while game_board.available_spaces:
             p1_choice = p1.select_position(game_board)
-            p2_choice = p2.select_position(game_board)
-
-            print(type(p1_choice))
             game_board.squares[p1_choice] = 'O'
             game_board.update_playing_board()
-            print(game_board.squares)
+            game_board.print_playing_board()
+            if self._is_winning_condition(p1):
+                print(self.prompt(f'{p1.__class__.__name__} wins!'))
+                return
+            p2_choice = p2.select_position(game_board)
+            game_board.squares[p2_choice] = 'X'
+            game_board.update_playing_board()
+            game_board.print_playing_board()
+            if self._is_winning_condition(p2):
+                print(self.prompt(f'{p2.__class__.__name__} wins!'))
+                return
 
-            if p1_choice and p2_choice:
-                break
-
-        game_board.print_playing_board()
+        print('All moves exhausted. It\'s a tie!')
 
     def _randomly_select_starter(self):
         '''
@@ -301,11 +333,12 @@ class TTTGame(PromptMixIn):
         second_player = [player for player in players if 
                          player is not first_player][0]
         first_player.marker, second_player.marker = 'O', 'X'
-        print(self.prompt(f'First player is {first_player.__class__.__name__}: '
+        print(self.prompt(f'Player 1 is {first_player.__class__.__name__}: '
                           f'{first_player.marker}'))
-        print(self.prompt('Second player is ',
+        print(self.prompt('Player 2 is ',
                           f'{second_player.__class__.__name__}: '
                           f'{second_player.marker}'))
+        print(self.prompt('Player 1 will make the first move.'))
         return first_player, second_player
 
     def _display_welcome_message(self):
@@ -314,6 +347,21 @@ class TTTGame(PromptMixIn):
     def _refresh_display_with_template(self, game_board):
         os.system('clear')
         game_board.print_template_board()
+
+    def _is_winning_condition(self, player):
+        '''
+        winning conditions are
+        diagonals: 1-5-9, 3-5-7
+        verticals: 1-4-7, 2-5-8, 3-6-9
+        horizontals: 1-2-3, 4-5-6, 7-8-9
+
+        check to see if any set of these is in the set of player positions. if 
+        yes, player wins
+        '''
+
+        for three_in_row in self.WINNING_CONDITIONS:
+            if player.positions.issuperset(three_in_row):
+                return True
 
 game = TTTGame()
 game.play()
