@@ -155,10 +155,11 @@ class Board(PromptMixIn):
             print(row)
 
     def print_playing_board(self):
+        os.system('clear')
         for row in self.playing_board:
             print(row)
 
-    def update_playing_board(self):
+    def update_playing_board(self, player, player_choice):
         '''
         STUB
         algorithm to update playing board with player's position choice
@@ -167,6 +168,8 @@ class Board(PromptMixIn):
         get index (row, col) of selected position
         replace position in the playing_board
         '''
+        self.squares[player_choice] = player.marker
+
         self.playing_board = [
             '+-----------------+',
             f'|  {self.squares[1]}  |  {self.squares[2]}  |  {self.squares[3]}  |',
@@ -295,53 +298,69 @@ class TTTGame(PromptMixIn):
                 - exit and display appropriate message if condition met
         - display end game message
         '''
+        self._clear_console()
         self._display_welcome_message()
-        p1, p2 = self._randomly_select_starter()
-        game_board = Board()
+        self._reading_seconds(2)
+        p1, p2 = self._select_starter_random()
+        self._set_player_marker(p1, p2)
+        self._print_starting_players(p1, p2)
+        self._reading_seconds(5)
+        game_board = self._initialize_board()
         game_board.print_template()
-        time.sleep(4)
+        self._reading_seconds(4)
+
         while game_board.available_spaces:
             p1_choice = p1.select_position(game_board)
-            game_board.squares[p1_choice] = p1.marker
-            game_board.update_playing_board()
+            game_board.update_playing_board(p1, p1_choice)
             game_board.print_playing_board()
             if self._is_winning_condition(p1):
-                print(self.prompt(f'{p1.__class__.__name__} wins!'))
+                self._print_winner(p1)
+                self._reading_seconds(2)
+                self._clear_console()
                 return
             p2_choice = p2.select_position(game_board)
-            game_board.squares[p2_choice] = p2.marker
-            game_board.update_playing_board()
+            game_board.update_playing_board(p2, p2_choice)
             game_board.print_playing_board()
             if self._is_winning_condition(p2):
-                print(self.prompt(f'{p2.__class__.__name__} wins!'))
+                self._print_winner(p2)
+                self._reading_seconds(2)
+                self._clear_console()
                 return
 
-        print('All moves exhausted. It\'s a tie!')
+        self._print_tie()
 
-    def _randomly_select_starter(self):
+    def _clear_console(self):
+        os.system('clear')
+
+    def _display_welcome_message(self):
+        print(self.prompt('Welcome to Tic-Tac-Toe!'))
+
+    def _reading_seconds(self, seconds):
+        time.sleep(seconds)
+
+    def _select_starter_random(self):
         '''
-        selects a human or computer instance as the p1/p2 and sets marker for
-        each player 'O' for starter, 'X' for p2
+        selects a human or computer instance as the p1/p2
         '''
         players = [Human(), Computer()]
         first_player = random.choices(players)[0]
         second_player = [player for player in players if 
                          player is not first_player][0]
+        return first_player, second_player
+
+    def _set_player_marker(self, first_player, second_player):
         first_player.marker, second_player.marker = self.PLAYER_ONE_MARKER, self.PLAYER_TWO_MARKER
+    
+    def _print_starting_players(self, first_player, second_player):
         print(self.prompt(f'Player 1 is {first_player.__class__.__name__}: '
                           f'{first_player.marker}'))
         print(self.prompt('Player 2 is ',
                           f'{second_player.__class__.__name__}: '
                           f'{second_player.marker}'))
         print(self.prompt('Player 1 will make the first move.'))
-        return first_player, second_player
 
-    def _display_welcome_message(self):
-        print(self.prompt('Welcome to Tic-Tac-Toe!'))
-
-    def _refresh_display_with_template(self, game_board):
-        os.system('clear')
-        game_board.print_template_board()
+    def _initialize_board(self):
+        return Board()
 
     def _is_winning_condition(self, player):
         '''
@@ -357,6 +376,12 @@ class TTTGame(PromptMixIn):
         for three_in_row in self.WINNING_CONDITIONS:
             if player.positions.issuperset(three_in_row):
                 return True
+
+    def _print_winner(self, player):
+        print(self.prompt(f'{player.__class__.__name__} wins!'))
+
+    def _print_tie(self):
+        print('All moves exhausted. It\'s a tie!')
 
 game = TTTGame()
 game.play()
