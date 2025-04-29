@@ -114,17 +114,7 @@ class Board(PromptMixIn):
     def __init__(self):
         self.available_spaces = list(Board.SPACES)
         self.occupied_spaces = list()
-        self.squares = {
-            1: ' ',
-            2: ' ',
-            3: ' ',
-            4: ' ',
-            5: ' ',
-            6: ' ',
-            7: ' ',
-            8: ' ',
-            9: ' ',
-        }
+        self.squares = {key: ' ' for key in range(1,10)}
 
     @property
     def available_spaces(self):
@@ -232,6 +222,7 @@ class Human(Player):
                     available.remove(choice)
                     print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
                     self.positions.add(choice)
+                    os.system('clear')
                     return choice
             except ValueError as e:
                 print(self.prompt(f'{e}. Input must be an available integer!'))
@@ -245,6 +236,7 @@ class Computer(Player):
             choice = random.choices(available)[0]
             available.remove(choice)
             self.positions.add(choice)
+            os.system('clear')
             print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
             return choice
 
@@ -260,6 +252,9 @@ class TTTGame(PromptMixIn):
             {4, 5, 6},
             {7, 8, 9},
         ]
+
+    PLAYER_ONE_MARKER = 'O'
+    PLAYER_TWO_MARKER = 'X'
     '''
     orchestration engine
 
@@ -307,14 +302,14 @@ class TTTGame(PromptMixIn):
         time.sleep(4)
         while game_board.available_spaces:
             p1_choice = p1.select_position(game_board)
-            game_board.squares[p1_choice] = 'O'
+            game_board.squares[p1_choice] = p1.marker
             game_board.update_playing_board()
             game_board.print_playing_board()
             if self._is_winning_condition(p1):
                 print(self.prompt(f'{p1.__class__.__name__} wins!'))
                 return
             p2_choice = p2.select_position(game_board)
-            game_board.squares[p2_choice] = 'X'
+            game_board.squares[p2_choice] = p2.marker
             game_board.update_playing_board()
             game_board.print_playing_board()
             if self._is_winning_condition(p2):
@@ -332,7 +327,7 @@ class TTTGame(PromptMixIn):
         first_player = random.choices(players)[0]
         second_player = [player for player in players if 
                          player is not first_player][0]
-        first_player.marker, second_player.marker = 'O', 'X'
+        first_player.marker, second_player.marker = self.PLAYER_ONE_MARKER, self.PLAYER_TWO_MARKER
         print(self.prompt(f'Player 1 is {first_player.__class__.__name__}: '
                           f'{first_player.marker}'))
         print(self.prompt('Player 2 is ',
