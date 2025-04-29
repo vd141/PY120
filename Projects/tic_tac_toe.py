@@ -70,17 +70,18 @@ there isn't already a piece
         - place a piece
 
 '''
-
-'''
-scaffolding
-'''
-
 import random
 import os
 import time
 
 class PromptMixIn:
+    '''
+    format prompt for output to console
+    '''
     def prompt(self, *messages):
+        '''
+        takes a message argument of any number of strings and adds ==> to front
+        '''
         return f'==> {''.join(messages)}'
 
 class Board(PromptMixIn):
@@ -113,13 +114,13 @@ class Board(PromptMixIn):
 
     def __init__(self):
         self.available_spaces = list(Board.SPACES)
-        self.occupied_spaces = list()
+        self.occupied_spaces = []
         self.squares = {key: ' ' for key in range(1,10)}
 
     @property
     def available_spaces(self):
         return self._available_spaces
-    
+
     @available_spaces.setter
     def available_spaces(self, other):
         self._available_spaces = other
@@ -127,7 +128,7 @@ class Board(PromptMixIn):
     @property
     def occupied_spaces(self):
         return self._occupied_spaces
-    
+
     @occupied_spaces.setter
     def occupied_spaces(self, other):
         self._occupied_spaces = other
@@ -135,7 +136,7 @@ class Board(PromptMixIn):
     @property
     def playing_board(self):
         return self._player_board
-    
+
     @playing_board.setter
     def playing_board(self, other):
         self._player_board = other
@@ -143,7 +144,7 @@ class Board(PromptMixIn):
     @property
     def squares(self):
         return self._squares
-    
+
     @squares.setter
     def squares(self, other):
         self._squares = other
@@ -155,11 +156,10 @@ class Board(PromptMixIn):
             print(row)
 
     def print_playing_board(self):
-        os.system('clear')
         for row in self.playing_board:
             print(row)
 
-    def update_playing_board(self, player, player_choice):
+    def update_playing_board(self, marker, player_position_choice):
         '''
         STUB
         algorithm to update playing board with player's position choice
@@ -168,7 +168,7 @@ class Board(PromptMixIn):
         get index (row, col) of selected position
         replace position in the playing_board
         '''
-        self.squares[player_choice] = player.marker
+        self.squares[player_position_choice] = marker
 
         self.playing_board = [
             '+-----------------+',
@@ -182,18 +182,17 @@ class Board(PromptMixIn):
 
 class Player(PromptMixIn):
     '''
-    select a piece
-    place a piece
+    tracks score, marker, and occupied positions
     '''
     def __init__(self):
         self.score = 0
         self.marker = None
         self.positions = set()
-        
+
     @property
     def score(self):
         return self._score
-    
+
     @score.setter
     def score(self, other):
         self._score = other
@@ -201,7 +200,7 @@ class Player(PromptMixIn):
     @property
     def marker(self):
         return self._marker
-    
+
     @marker.setter
     def marker(self, other):
         self._marker = other
@@ -209,12 +208,15 @@ class Player(PromptMixIn):
     @property
     def positions(self):
         return self._positions
-    
+
     @positions.setter
     def positions(self, other):
         self._positions = other
 
 class Human(Player):
+    '''
+    prompts user at CLI to enter an available position.
+    '''
     def select_position(self, board):
         available = board.available_spaces
         while available:
@@ -231,6 +233,9 @@ class Human(Player):
                 print(self.prompt(f'{e}. Input must be an available integer!'))
 
 class Computer(Player):
+    '''
+    randomly selects from an available position
+    '''
     def select_position(self, board):
         available = board.available_spaces
         if available:
@@ -311,7 +316,8 @@ class TTTGame(PromptMixIn):
 
         while game_board.available_spaces:
             p1_choice = p1.select_position(game_board)
-            game_board.update_playing_board(p1, p1_choice)
+            game_board.update_playing_board(p1.marker, p1_choice)
+            self._clear_console()
             game_board.print_playing_board()
             if self._is_winning_condition(p1):
                 self._print_winner(p1)
@@ -319,7 +325,8 @@ class TTTGame(PromptMixIn):
                 self._clear_console()
                 return
             p2_choice = p2.select_position(game_board)
-            game_board.update_playing_board(p2, p2_choice)
+            game_board.update_playing_board(p2.marker, p2_choice)
+            self._clear_console()
             game_board.print_playing_board()
             if self._is_winning_condition(p2):
                 self._print_winner(p2)
@@ -344,13 +351,13 @@ class TTTGame(PromptMixIn):
         '''
         players = [Human(), Computer()]
         first_player = random.choices(players)[0]
-        second_player = [player for player in players if 
+        second_player = [player for player in players if
                          player is not first_player][0]
         return first_player, second_player
 
     def _set_player_marker(self, first_player, second_player):
         first_player.marker, second_player.marker = self.PLAYER_ONE_MARKER, self.PLAYER_TWO_MARKER
-    
+
     def _print_starting_players(self, first_player, second_player):
         print(self.prompt(f'Player 1 is {first_player.__class__.__name__}: '
                           f'{first_player.marker}'))
@@ -376,6 +383,8 @@ class TTTGame(PromptMixIn):
         for three_in_row in self.WINNING_CONDITIONS:
             if player.positions.issuperset(three_in_row):
                 return True
+
+        return False
 
     def _print_winner(self, player):
         print(self.prompt(f'{player.__class__.__name__} wins!'))
