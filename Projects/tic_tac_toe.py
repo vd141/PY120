@@ -92,7 +92,8 @@ class PromptMixIn:
 
         if len(iterable) is 2, return those two elements separated by final
 
-        if len(iterable) is greater than 2, return those elements separated by commas, oxford, and final
+        if len(iterable) is greater than 2, return those elements separated by 
+        commas, oxford, and final
         '''
 
         output_str = ''
@@ -335,7 +336,16 @@ class TTTGame(PromptMixIn):
         self._clear_console()
         self._display_welcome_message()
         self._reading_seconds(2)
-        self._play_a_game()
+        game_board = self._initialize_board()
+        game_board.print_template()
+        self._reading_seconds(4)
+        while True:
+            self._play_a_game()
+            if not self._play_another_game():
+                break
+        self._display_goodbye_message()
+        self._reading_seconds(2)
+        self._clear_console()
 
     def _play_a_game(self):
         p1, p2 = self._select_starter_random()
@@ -343,8 +353,6 @@ class TTTGame(PromptMixIn):
         self._print_starting_players(p1, p2)
         self._reading_seconds(5)
         game_board = self._initialize_board()
-        game_board.print_template()
-        self._reading_seconds(4)
 
         while game_board.available_spaces:
             p1_choice = p1.select_position(game_board)
@@ -368,11 +376,26 @@ class TTTGame(PromptMixIn):
 
         self._print_tie()
 
+    def _play_another_game(self):
+        while True:
+            user_decision = input(self.prompt('Would you like to play another '
+                                              'game? y/n ')).lower()
+            if user_decision in ['y', 'n']:
+                if user_decision == 'y':
+                    return True
+                else:
+                    return False
+            else:
+                print(self.prompt('Input must be either y/n!'))
+
     def _clear_console(self):
         os.system('clear')
 
     def _display_welcome_message(self):
         print(self.prompt('Welcome to Tic-Tac-Toe!'))
+
+    def _display_goodbye_message(self):
+        print(self.prompt('Thanks for playing. Goodbye!'))
 
     def _reading_seconds(self, seconds):
         time.sleep(seconds)
@@ -442,4 +465,8 @@ display the message again
 
 program should display the results after each game ends, but before asking whether the
 human player wants to play again
+    - keep track of human and computer scores
+
+program should display the goodbye message when the human player decides not to 
+play again. it should never display the goodbye message before that
 '''
