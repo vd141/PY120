@@ -335,6 +335,9 @@ class TTTGame(PromptMixIn):
         self._clear_console()
         self._display_welcome_message()
         self._reading_seconds(2)
+        self._play_a_game()
+
+    def _play_a_game(self):
         p1, p2 = self._select_starter_random()
         self._set_player_marker(p1, p2)
         self._print_starting_players(p1, p2)
@@ -423,3 +426,20 @@ class TTTGame(PromptMixIn):
 
 game = TTTGame()
 game.play()
+
+'''
+implementing play again
+
+start a new game of TTT if the human wants to play again
+
+accepts y/n (in lowercase or uppercase) as valid answers at the play again prompt
+all other answers are invalid
+
+program should display the welcome message before the first game starts. it should never
+display the message again
+    - move everythign in play (except welcome message) into its own function and 
+    call that function if player wants to replay
+
+program should display the results after each game ends, but before asking whether the
+human player wants to play again
+'''
