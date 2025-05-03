@@ -83,6 +83,35 @@ class PromptMixIn:
         takes a message argument of any number of strings and adds ==> to front
         '''
         return f'==> {''.join(messages)}'
+    
+    def join_or(self, iterable, separator=', ', final='or'):
+        '''
+        returns a string: '1, 2, 3, 4, 5, or 6'
+
+        if len(iterable) is 1 , return that element
+
+        if len(iterable) is 2, return those two elements separated by final
+
+        if len(iterable) is greater than 2, return those elements separated by commas, oxford, and final
+        '''
+
+        output_str = ''
+
+        try:
+            if len(iterable) <= 1:
+                output_str += str(iterable[0])
+            elif len(iterable) == 2:
+                output_str += ' '.join([str(iterable[0]), final, str(iterable[1])])
+            elif len(iterable) > 2:
+                for item in iterable[:-2]:
+                    output_str += str(item)
+                    output_str += separator
+                output_str += str(iterable[-2]) + separator + final + ' ' + str(iterable[-1])
+            return output_str
+        except IndexError as e:
+            print(f'Iterable must contain at least 1 element: {e}')
+
+# print(PromptMixIn().join_or([1, 2]))
 
 class Board(PromptMixIn):
     '''
@@ -222,7 +251,7 @@ class Human(Player):
         while available:
             try:
                 choice = int(input(self.prompt('Please choose an available ',
-                                           f'position: {available}: ')))
+                                           f'position: {self.join_or(available)}: ')))
                 if choice in available:
                     available.remove(choice)
                     print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
