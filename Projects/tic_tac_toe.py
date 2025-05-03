@@ -271,7 +271,9 @@ class Computer(Player):
         if available:
             print(self.prompt('Computer deciding...'))
             time.sleep(2)
-            choice = self._defensive_algorithm_choice(available, 
+            choice = self._computer_ai_choice(available, self.positions)
+            if not choice:
+                choice = self._computer_ai_choice(available, 
                                                       opponent_positions)
             if not choice:
                 choice = random.choices(available)[0]
@@ -281,15 +283,19 @@ class Computer(Player):
             print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
             return choice
         
-    def _defensive_algorithm_choice(self, available, opponent_positions):
+    def _computer_ai_choice(self, available, current_positions):
+        '''
+        feed opponent positions into current_positions for defensive strategy
+        feed self's positions into current_positions for offensive strategy
+        '''
         winning_combos = TTTGame.WINNING_CONDITIONS
 
         for combo in winning_combos:
-            intersection = combo.intersection(opponent_positions)
+            intersection = combo.intersection(current_positions)
             if len(intersection) == 2:
-                blocking_choice = list(combo - intersection)[0]
-                if blocking_choice in available:
-                    return blocking_choice
+                next_choice = list(combo - intersection)[0]
+                if next_choice in available:
+                    return next_choice
         return None
 
 
@@ -516,4 +522,7 @@ defensive strategy will be added to the computer's choice method as a helper met
           interacting with the other player in addition to the game
         - doesn't have to interact with the entire opponent instance, can interact
           with an attribute of the opponent, namely the positions
+
+offensive strategy will use the same functino for defensive strategy, but alter
+the inputs
 '''
