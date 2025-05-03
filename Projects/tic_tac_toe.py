@@ -310,6 +310,24 @@ class TTTGame(PromptMixIn):
         STUB
         '''
         self.board = Board()
+        self.player_score = 0
+        self.computer_score = 0
+
+    @property
+    def player_score(self):
+        return self._player_score
+    
+    @player_score.setter
+    def player_score(self, score):
+        self._player_score = score
+
+    @property
+    def computer_score(self):
+        return self._computer_score
+    
+    @computer_score.setter
+    def computer_score(self, score):
+        self._computer_score = score
 
     def play(self):
         '''
@@ -341,6 +359,7 @@ class TTTGame(PromptMixIn):
         self._reading_seconds(4)
         while True:
             self._play_a_game()
+            self._print_score()
             if not self._play_another_game():
                 break
         self._display_goodbye_message()
@@ -360,6 +379,7 @@ class TTTGame(PromptMixIn):
             self._clear_console()
             game_board.print_playing_board()
             if self._is_winning_condition(p1):
+                self._tally_score(p1)
                 self._print_winner(p1)
                 self._reading_seconds(2)
                 self._clear_console()
@@ -369,6 +389,7 @@ class TTTGame(PromptMixIn):
             self._clear_console()
             game_board.print_playing_board()
             if self._is_winning_condition(p2):
+                self._tally_score(p2)
                 self._print_winner(p2)
                 self._reading_seconds(2)
                 self._clear_console()
@@ -440,6 +461,16 @@ class TTTGame(PromptMixIn):
                 return True
 
         return False
+    
+    def _tally_score(self, player):
+        if type(player) is Human:
+            self.player_score += 1
+        if type(player) is Computer:
+            self.computer_score += 1
+
+    def _print_score(self):
+        print(self.prompt(f'Human\'s score is {self.player_score}. '
+                          f'Computer\'s score is {self.computer_score}'))
 
     def _print_winner(self, player):
         print(self.prompt(f'{player.__class__.__name__} wins!'))
@@ -453,20 +484,13 @@ game.play()
 '''
 implementing play again
 
-start a new game of TTT if the human wants to play again
-
-accepts y/n (in lowercase or uppercase) as valid answers at the play again prompt
-all other answers are invalid
-
-program should display the welcome message before the first game starts. it should never
-display the message again
-    - move everythign in play (except welcome message) into its own function and 
-    call that function if player wants to replay
+TODO:
 
 program should display the results after each game ends, but before asking whether the
 human player wants to play again
     - keep track of human and computer scores
+    - game keeps track of human and player scores
+    - game has a function to determine which score (player/computer) to increment
+    when a contestant wins
 
-program should display the goodbye message when the human player decides not to 
-play again. it should never display the goodbye message before that
 '''
