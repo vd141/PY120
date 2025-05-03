@@ -247,7 +247,7 @@ class Human(Player):
     '''
     prompts user at CLI to enter an available position.
     '''
-    def select_position(self, board):
+    def select_position(self, board, opponent_positions):
         available = board.available_spaces
         while available:
             try:
@@ -266,17 +266,31 @@ class Computer(Player):
     '''
     randomly selects from an available position
     '''
-    def select_position(self, board):
+    def select_position(self, board, opponent_positions):
         available = board.available_spaces
         if available:
             print(self.prompt('Computer deciding...'))
             time.sleep(2)
-            choice = random.choices(available)[0]
+            choice = self._defensive_algorithm_choice(available, 
+                                                      opponent_positions)
+            if not choice:
+                choice = random.choices(available)[0]
             available.remove(choice)
             self.positions.add(choice)
             os.system('clear')
             print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
             return choice
+        
+    def _defensive_algorithm_choice(self, available, opponent_positions):
+        winning_combos = TTTGame.WINNING_CONDITIONS
+
+        for combo in winning_combos:
+            intersection = combo.intersection(opponent_positions)
+            if len(intersection) == 2:
+                blocking_choice = list(combo - intersection)[0]
+                if blocking_choice in available:
+                    return blocking_choice
+        return None
 
 
 class TTTGame(PromptMixIn):
@@ -374,7 +388,7 @@ class TTTGame(PromptMixIn):
         game_board = self._initialize_board()
 
         while game_board.available_spaces:
-            p1_choice = p1.select_position(game_board)
+            p1_choice = p1.select_position(game_board, p2.positions)
             game_board.update_playing_board(p1.marker, p1_choice)
             self._clear_console()
             game_board.print_playing_board()
@@ -384,7 +398,7 @@ class TTTGame(PromptMixIn):
                 self._reading_seconds(2)
                 self._clear_console()
                 return
-            p2_choice = p2.select_position(game_board)
+            p2_choice = p2.select_position(game_board, p1.positions)
             game_board.update_playing_board(p2.marker, p2_choice)
             self._clear_console()
             game_board.print_playing_board()
@@ -482,15 +496,24 @@ game = TTTGame()
 game.play()
 
 '''
-implementing play again
+implementing computer AI defensive strategy
 
-TODO:
+blocks a threat, which is defined as an opponent being one position away from
+winning
 
-program should display the results after each game ends, but before asking whether the
-human player wants to play again
-    - keep track of human and computer scores
-    - game keeps track of human and player scores
-    - game has a function to determine which score (player/computer) to increment
-    when a contestant wins
-
+defensive strategy will be added to the computer's choice method as a helper method
+    - checks if opponent is one square away from a win
+        - win conditions are stored in sets
+        - check if the intersection of the opponent's positions and any of the 
+          winning sets has a length of 2
+        - if so, the remaining position is the square to fill. choose the remaining
+          square
+    - identifies which square to fill to prevent opponent win
+    - chooses that square
+    - determine which of the board's occupied spaces are the opponents
+    - easier to grab positions from human player's class instance
+        - but adds a level of complication to object relationships: computer is now
+          interacting with the other player in addition to the game
+        - doesn't have to interact with the entire opponent instance, can interact
+          with an attribute of the opponent, namely the positions
 '''
