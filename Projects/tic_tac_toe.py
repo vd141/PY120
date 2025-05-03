@@ -141,6 +141,7 @@ class Board(PromptMixIn):
         '|     |     |     |',
         '+-----------------+'
     ]
+    CENTER = 5
 
     def __init__(self):
         self.available_spaces = list(Board.SPACES)
@@ -276,6 +277,8 @@ class Computer(Player):
                 choice = self._computer_ai_choice(available, 
                                                       opponent_positions)
             if not choice:
+                choice = self._pick_center(available)
+            if not choice:
                 choice = random.choices(available)[0]
             available.remove(choice)
             self.positions.add(choice)
@@ -296,6 +299,11 @@ class Computer(Player):
                 next_choice = list(combo - intersection)[0]
                 if next_choice in available:
                     return next_choice
+        return None
+    
+    def _pick_center(self, available):
+        if Board.CENTER in available:
+            return Board.CENTER
         return None
 
 
