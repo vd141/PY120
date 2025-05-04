@@ -272,9 +272,9 @@ class Computer(Player):
         if available:
             print(self.prompt('Computer deciding...'))
             time.sleep(2)
-            choice = self._computer_ai_choice(available, self.positions)
+            choice = self._offensive_computer_move(available, self.positions)
             if not choice:
-                choice = self._computer_ai_choice(available, 
+                choice = self._defensive_computer_move(available, 
                                                       opponent_positions)
             if not choice:
                 choice = self._pick_center(available)
@@ -285,6 +285,12 @@ class Computer(Player):
             os.system('clear')
             print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
             return choice
+        
+    def _offensive_computer_move(self, available, self_positions):
+        return self._computer_ai_choice(available, self_positions)
+    
+    def _defensive_computer_move(self, available, opponent_positions):
+        return self._computer_ai_choice(available, opponent_positions)
         
     def _computer_ai_choice(self, available, current_positions):
         '''
@@ -388,6 +394,10 @@ class TTTGame(PromptMixIn):
         while True:
             self._play_a_game()
             self._print_score()
+            winner = self._best_of_three()
+            if winner:
+                print(self.prompt(f'{winner} won the match!'))
+                break
             if not self._play_another_game():
                 break
         self._display_goodbye_message()
@@ -506,31 +516,24 @@ class TTTGame(PromptMixIn):
     def _print_tie(self):
         print('All moves exhausted. It\'s a tie!')
 
+    def _best_of_three(self):
+        if self._player_score == 3:
+            return 'Human'
+        if self._computer_score == 3:
+            return 'Computer'
+        return None
+
 game = TTTGame()
 game.play()
 
 '''
-implementing computer AI defensive strategy
+keep score locally in the TTTGame instance instead of globally or in the class
+    - the score is currently being kept in an instance variable (DONE)
+    - designate the winner to be the player to reach 3 wins
 
-blocks a threat, which is defined as an opponent being one position away from
-winning
+first to 3 game wins is the winner. report score after each game. state when
+player wins match
 
-defensive strategy will be added to the computer's choice method as a helper method
-    - checks if opponent is one square away from a win
-        - win conditions are stored in sets
-        - check if the intersection of the opponent's positions and any of the 
-          winning sets has a length of 2
-        - if so, the remaining position is the square to fill. choose the remaining
-          square
-    - identifies which square to fill to prevent opponent win
-    - chooses that square
-    - determine which of the board's occupied spaces are the opponents
-    - easier to grab positions from human player's class instance
-        - but adds a level of complication to object relationships: computer is now
-          interacting with the other player in addition to the game
-        - doesn't have to interact with the entire opponent instance, can interact
-          with an attribute of the opponent, namely the positions
-
-offensive strategy will use the same functino for defensive strategy, but alter
-the inputs
+end program after playing one full match (3 games). play again question only
+applied to each game (not after the match)
 '''
