@@ -83,7 +83,7 @@ class PromptMixIn:
         takes a message argument of any number of strings and adds ==> to front
         '''
         return f'==> {''.join(messages)}'
-    
+
     def join_or(self, iterable, separator=', ', final='or'):
         '''
         returns a string: '1, 2, 3, 4, 5, or 6'
@@ -248,7 +248,12 @@ class Human(Player):
     '''
     prompts user at CLI to enter an available position.
     '''
-    def select_position(self, board, opponent_positions):
+    def select_position(self, board, opponent_positions=None):
+        '''
+        prompts user to select an available position
+
+        unused parameter left as is for polymorphism
+        '''
         available = board.available_spaces
         while available:
             try:
@@ -265,6 +270,9 @@ class Human(Player):
 
 class Computer(Player):
     '''
+    prompts computer to select a position using an offensive, defensive, center,
+    or random strategy
+
     randomly selects from an available position
     '''
     def select_position(self, board, opponent_positions):
@@ -274,7 +282,7 @@ class Computer(Player):
             time.sleep(2)
             choice = self._offensive_computer_move(available, self.positions)
             if not choice:
-                choice = self._defensive_computer_move(available, 
+                choice = self._defensive_computer_move(available,
                                                       opponent_positions)
             if not choice:
                 choice = self._pick_center(available)
@@ -285,13 +293,13 @@ class Computer(Player):
             os.system('clear')
             print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
             return choice
-        
+
     def _offensive_computer_move(self, available, self_positions):
         return self._computer_ai_choice(available, self_positions)
-    
+
     def _defensive_computer_move(self, available, opponent_positions):
         return self._computer_ai_choice(available, opponent_positions)
-        
+
     def _computer_ai_choice(self, available, current_positions):
         '''
         feed opponent positions into current_positions for defensive strategy
@@ -306,7 +314,7 @@ class Computer(Player):
                 if next_choice in available:
                     return next_choice
         return None
-    
+
     def _pick_center(self, available):
         if Board.CENTER in available:
             return Board.CENTER
@@ -314,6 +322,9 @@ class Computer(Player):
 
 
 class TTTGame(PromptMixIn):
+    '''
+    handles game flow and attributes
+    '''
     WINNING_CONDITIONS = [
             {1, 5, 9},
             {3, 5, 7},
@@ -350,7 +361,7 @@ class TTTGame(PromptMixIn):
     @property
     def player_score(self):
         return self._player_score
-    
+
     @player_score.setter
     def player_score(self, score):
         self._player_score = score
@@ -358,7 +369,7 @@ class TTTGame(PromptMixIn):
     @property
     def computer_score(self):
         return self._computer_score
-    
+
     @computer_score.setter
     def computer_score(self, score):
         self._computer_score = score
@@ -442,10 +453,8 @@ class TTTGame(PromptMixIn):
             if user_decision in ['y', 'n']:
                 if user_decision == 'y':
                     return True
-                else:
-                    return False
-            else:
-                print(self.prompt('Input must be either y/n!'))
+                return False
+            print(self.prompt('Input must be either y/n!'))
 
     def _clear_console(self):
         os.system('clear')
@@ -499,11 +508,11 @@ class TTTGame(PromptMixIn):
                 return True
 
         return False
-    
+
     def _tally_score(self, player):
-        if type(player) is Human:
+        if isinstance(player, Human):
             self.player_score += 1
-        if type(player) is Computer:
+        if isinstance(player, Computer):
             self.computer_score += 1
 
     def _print_score(self):
@@ -525,15 +534,3 @@ class TTTGame(PromptMixIn):
 
 game = TTTGame()
 game.play()
-
-'''
-keep score locally in the TTTGame instance instead of globally or in the class
-    - the score is currently being kept in an instance variable (DONE)
-    - designate the winner to be the player to reach 3 wins
-
-first to 3 game wins is the winner. report score after each game. state when
-player wins match
-
-end program after playing one full match (3 games). play again question only
-applied to each game (not after the match)
-'''
