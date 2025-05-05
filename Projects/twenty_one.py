@@ -64,6 +64,11 @@
 4. write scaffolding and spike code
 '''
 import random
+import os
+import time
+
+def clear_screen():
+    os.system('clear')
 
 class PromptMixIn:
     '''
@@ -257,6 +262,7 @@ class Dealer(Opponent):
                 self.hit(deck.draw())
                 self.display_full_hand()
                 self.display_hand_value()
+                self._reading_pause_seconds(3)
                 if self.is_bust():
                     print(self.prompt(f'{self.__class__.__name__} busts!'))
                     break
@@ -269,6 +275,9 @@ class Dealer(Opponent):
         displays first card in hand
         '''
         print(self.prompt(f'Dealer shows {self.hand[0]}.'))
+
+    def _reading_pause_seconds(self, seconds):
+        time.sleep(seconds)
 
 class Player(Opponent):
     '''
@@ -308,6 +317,25 @@ class Player(Opponent):
                     break
             else:
                 print(self.prompt('Input must either be \'h\' or \'s\'!'))
+
+    def is_rich(self):
+        return self.cash >= 10
+    
+    def is_broke(self):
+        return self.cash <= 0
+    
+    def display_cash(self):
+        print(self.prompt(f'Player has {self.cash} dollars.'))
+
+    def display_cash_condition(self):
+        if self.is_broke():
+            print(self.prompt(f'{self.__class__.__name__} is broke!'))
+        if self.is_rich():
+            print(self.prompt(f'{self.__class__.__name__} is rich!'))
+
+    # def is_bust(self):
+    #     if super().is_bust:
+    #         self.cash -= 1
 
     @property
     def cash(self):
@@ -363,16 +391,23 @@ class TwentyOne(PromptMixIn):
         self._deck = new_deck
 
     def play(self):
+        clear_screen()
         self._welcome_message()
-        self._deal_cards()
-        self.dealer.show_one()
-        self.player.display_full_hand()
-        self.player.display_hand_value()
-        self.player.hit_or_stay(self.deck)
-        if not self.player.is_bust():
-            self.dealer.strategy(self.deck)
-        if not self._win_if_bust():
-            self._win_score()
+        while not (self.player.is_broke() or self.player.is_rich()):
+            self._deal_cards()
+            self.dealer.show_one()
+            self.player.display_full_hand()
+            self.player.display_hand_value()
+            self.player.hit_or_stay(self.deck)
+            if not self.player.is_bust():
+                self.dealer.strategy(self.deck)
+            if not self._win_if_bust():
+                self._win_score()
+            self.player.display_cash()
+            self._reset_deck_and_hands()
+            self._reading_pause_seconds(3)
+            clear_screen()
+        self.player.display_cash_condition()
         self._goodbye_message()
 
     def _deal_cards(self):
@@ -383,19 +418,31 @@ class TwentyOne(PromptMixIn):
     def _win_if_bust(self):
         if self.player.is_bust():
             print(self.prompt(f'{self.dealer.__class__.__name__} wins!'))
+            self.player.cash -= 1
             return True
         if self.dealer.is_bust():
             print(self.prompt(f'{self.player.__class__.__name__} wins!'))
+            self.player.cash += 1
             return True
         return False
 
     def _win_score(self):
         if self.player.hand_value > self.dealer.hand_value:
             print(self.prompt(f'{self.player.__class__.__name__} wins!'))
+            self.player.cash += 1
         elif self.dealer.hand_value > self.player.hand_value:
             print(self.prompt(f'{self.dealer.__class__.__name__} wins!'))
+            self.player.cash -= 1
         else:
             print(self.prompt('It\'s a tie!'))
+
+    def _reset_deck_and_hands(self):
+        self.player.reset()
+        self.dealer.reset()
+        self.deck.reset()
+
+    def _reading_pause_seconds(self, seconds):
+        time.sleep(seconds)
 
     def _welcome_message(self):
         print(self.prompt('Welcome to Twenty-One!'))
