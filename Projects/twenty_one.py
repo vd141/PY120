@@ -145,15 +145,21 @@ class Deck:
                   'Jack', 'Queen', 'King']
 
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         values = ['Ace', 2, 3, 4, 5, 6, 7, 8, 9, 10, 10, 10, 10]*4
         card_names = [f'{face_name} of {suit}' for suit in Deck.SUITS
                                         for face_name in Deck.FACES]
         self._deck = [Card(name, values[index]) for index, name in enumerate(
             card_names)]
         random.shuffle(self._deck)
-        
+
     def __str__(self):
         return str(list(str(card) for card in self._deck))
+
+    def __len__(self):
+        return len(self._deck)
 
     def draw(self):
         drawn_card = random.choice(self._deck)
@@ -172,7 +178,12 @@ class Opponent(PromptMixIn):
 
     has a method to display full hand
     '''
+    TWENTY_ONE = 21
+
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.hand = []
         self.hand_value = 0
         self.has_ace = False
@@ -208,13 +219,20 @@ class Opponent(PromptMixIn):
         determines if incoming card is ace. if so, latches has_ace to true
         '''
         card_value = card.value
-        if not self.has_ace and card_value is 'Ace':
+        if not self.has_ace and card_value == 'Ace':
             self.has_ace = True
             card_value = 11
-        elif card_value is 'Ace':
+        elif card_value == 'Ace':
             card_value = 1
         self.hand.append(card)
         self.hand_value += card_value
+
+    def display_full_hand(self):
+        print(self.prompt(f'{self.__class__.__name__}\'s hand is: '
+              f'{self.join_or([str(card) for card in self.hand], ', ', 'and')}.'))
+
+    def display_hand_value(self):
+        print(self.prompt(f'{self.__class__.__name__}\'s hand value is: {self.hand_value}.'))
 
     def hit(self, card):
         print(self.prompt(f'{self.__class__.__name__} hits!'))
@@ -222,6 +240,9 @@ class Opponent(PromptMixIn):
 
     def stay(self):
         print(self.prompt(f'{self.__class__.__name__} stays!'))
+
+    def is_bust(self):
+        return True if self.hand_value > Opponent.TWENTY_ONE else False
 
 class Dealer(Opponent):
     '''
@@ -231,10 +252,25 @@ class Dealer(Opponent):
     has a method to display one card
     '''
     def strategy(self, deck):
-        if self.value < 17:
-            self.hit(deck.draw())
-        else:
-            self.stay()
+        self.display_full_hand()
+        self.display_hand_value()
+        while True:
+            if self.hand_value < 17:
+                self.hit(deck.draw())
+                self.display_full_hand()
+                self.display_hand_value()
+                if self.is_bust():
+                    print(self.prompt(f'{self.__class__.__name__} busts!'))
+                    break
+            else:
+                self.stay()
+                break
+
+    def show_one(self):
+        '''
+        displays first card in hand
+        '''
+        print(self.prompt(f'Dealer shows {self.hand[0]}.'))
 
 class Player(Opponent):
     '''
@@ -242,9 +278,48 @@ class Player(Opponent):
 
     player also has a cash attribute, which is initialized to 5
     '''
-    pass
+    def __init__(self):
+        super().__init__()
+        self.cash = 5
 
-class TwentyOne:
+    def strategy(self, deck):
+        '''
+        shows player hand and value of hand
+
+        asks if player wants to hit or stay. continues asking until player stays or busts
+
+        player can enter h or s to hit or stay
+        '''
+        self.display_full_hand()
+        self.display_hand_value()
+        self.hit_or_stay(deck)
+
+    def hit_or_stay(self, deck):
+        while True:
+            decision = input(self.prompt('Do you want to (h)it or (s)tay? ')).lower()
+            if decision in ['h', 's']:
+                if decision == 'h':
+                    self.hit(deck.draw())
+                    self.display_full_hand()
+                    self.display_hand_value()
+                    if self.is_bust():
+                        print(self.prompt(f'{self.__class__.__name__} busts!'))
+                        break
+                else:
+                    self.stay()
+                    break
+            else:
+                print(self.prompt('Input must either be \'h\' or \'s\'!'))
+
+    @property
+    def cash(self):
+        return self._cash
+    
+    @cash.setter
+    def cash(self, new_cash):
+        self._cash = new_cash
+
+class TwentyOne(PromptMixIn):
     '''
     initializes deck and players. dictates game flow. decides a winner
 
@@ -259,4 +334,76 @@ class TwentyOne:
     goodbye message
 
     '''
-    pass
+
+    def __init__(self):
+        self.player = Player()
+        self.dealer = Dealer()
+        self.deck = Deck()
+
+    @property
+    def player(self):
+        return self._player
+
+    @player.setter
+    def player(self, new_player):
+        self._player = new_player
+
+    @property
+    def dealer(self):
+        return self._dealer
+
+    @dealer.setter
+    def dealer(self, new_dealer):
+        self._dealer = new_dealer
+
+    @property
+    def deck(self):
+        return self._deck
+
+    @deck.setter
+    def deck(self, new_deck):
+        self._deck = new_deck
+
+    def play(self):
+        self._welcome_message()
+        self._deal_cards()
+        self.dealer.show_one()
+        self.player.display_full_hand()
+        self.player.display_hand_value()
+        self.player.hit_or_stay(self.deck)
+        if not self.player.is_bust():
+            self.dealer.strategy(self.deck)
+        if not self._win_if_bust():
+            self._win_score()
+        self._goodbye_message()
+
+    def _deal_cards(self):
+        for _ in range(2):
+            self.player.add_to_hand(self.deck.draw())
+            self.dealer.add_to_hand(self.deck.draw())
+
+    def _win_if_bust(self):
+        if self.player.is_bust():
+            print(self.prompt(f'{self.dealer.__class__.__name__} wins!'))
+            return True
+        if self.dealer.is_bust():
+            print(self.prompt(f'{self.player.__class__.__name__} wins!'))
+            return True
+        return False
+
+    def _win_score(self):
+        if self.player.hand_value > self.dealer.hand_value:
+            print(self.prompt(f'{self.player.__class__.__name__} wins!'))
+        elif self.dealer.hand_value > self.player.hand_value:
+            print(self.prompt(f'{self.dealer.__class__.__name__} wins!'))
+        else:
+            print(self.prompt(f'It\'s a tie!'))
+
+    def _welcome_message(self):
+        print(self.prompt('Welcome to Twenty-One!'))
+
+    def _goodbye_message(self):
+        print(self.prompt('Thanks for playing. Goodbye!'))
+
+game = TwentyOne()
+game.play()
