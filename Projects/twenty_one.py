@@ -64,9 +64,6 @@
 4. write scaffolding and spike code
 '''
 import random
-import copy
-import time
-import os
 
 class PromptMixIn:
     '''
@@ -105,6 +102,7 @@ class PromptMixIn:
             return output_str
         except IndexError as e:
             print(f'Iterable must contain at least 1 element: {e}')
+            return None
 
 class Card:
     '''
@@ -120,7 +118,7 @@ class Card:
     @property
     def name(self):
         return self._name
-    
+
     @name.setter
     def name(self, new_name):
         self._name = new_name
@@ -128,7 +126,7 @@ class Card:
     @property
     def value(self):
         return self._value
-    
+
     @value.setter
     def value(self, new_value):
         self._value = new_value
@@ -242,7 +240,7 @@ class Opponent(PromptMixIn):
         print(self.prompt(f'{self.__class__.__name__} stays!'))
 
     def is_bust(self):
-        return True if self.hand_value > Opponent.TWENTY_ONE else False
+        return self.hand_value > Opponent.TWENTY_ONE
 
 class Dealer(Opponent):
     '''
@@ -314,7 +312,7 @@ class Player(Opponent):
     @property
     def cash(self):
         return self._cash
-    
+
     @cash.setter
     def cash(self, new_cash):
         self._cash = new_cash
@@ -397,7 +395,7 @@ class TwentyOne(PromptMixIn):
         elif self.dealer.hand_value > self.player.hand_value:
             print(self.prompt(f'{self.dealer.__class__.__name__} wins!'))
         else:
-            print(self.prompt(f'It\'s a tie!'))
+            print(self.prompt('It\'s a tie!'))
 
     def _welcome_message(self):
         print(self.prompt('Welcome to Twenty-One!'))
