@@ -104,6 +104,20 @@ class Player:
                'lizard': Lizard(),
                'spock': Spock(),
                }
+    
+    ABBREVIATIONS = {'r': 'rock',
+                     'p': 'paper',
+                     'sc': 'scissors',
+                     'l': 'lizard',
+                     'sp': 'spock',
+                     }
+    
+    CHOICES_FORMAT = ['(r)ock',
+                      '(p)aper',
+                      '(sc)issors',
+                      '(l)izard',
+                      '(sp)ock',
+                      ]
 
     def __init__(self):
         self.move_history = []
@@ -235,12 +249,12 @@ class Human(Player):
         prompts the user to make a choice (must be a valid choice)
         '''
         while True:
-            prompt = f'Select a move from {list(Player.CHOICES.keys())}: '
-            choice = input(prompt)
-            if choice in Player.CHOICES:
+            prompt = f'Select a move from {Player.CHOICES_FORMAT}: '
+            choice = input(prompt).lower()
+            if choice in Player.ABBREVIATIONS:
                 break
             print('Invalid choice. ', end='')
-        self.move = Player.CHOICES[choice]
+        self.move = Player.CHOICES[Player.ABBREVIATIONS[choice]]
 
 
 class RPSGame:
