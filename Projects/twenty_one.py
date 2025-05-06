@@ -323,10 +323,10 @@ class Player(Opponent):
 
     def is_rich(self):
         return self.cash >= 10
-    
+
     def is_broke(self):
         return self.cash <= 0
-    
+
     def display_cash(self):
         print(self.prompt(f'Player has {self.cash} dollars.'))
 
