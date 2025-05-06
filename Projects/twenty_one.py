@@ -221,13 +221,16 @@ class Opponent(PromptMixIn):
 
         determines if incoming card is ace. if so, latches has_ace to true
         '''
+        self.hand.append(card)
+        self._determine_value(card)
+
+    def _determine_value(self, card):
         card_value = card.value
         if not self.has_ace and card_value == 'Ace':
             self.has_ace = True
             card_value = 11
         elif card_value == 'Ace':
             card_value = 1
-        self.hand.append(card)
         self.hand_value += card_value
 
     def display_full_hand(self):
