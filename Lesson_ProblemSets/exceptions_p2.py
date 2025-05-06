@@ -1,51 +1,73 @@
-def divide_by_second():
-    try:
-        first = float(input('Enter first number: '))
-        second = float(input('Enter second number: '))
-        first / second
-    except (ZeroDivisionError, ValueError) as e:
-        print(f'Error. {e}')
-    else:
-        print(f'Result is: {first / second}.')
-    finally:
-        print('End of program')
+'''
+exception exercises
+'''
 
-# divide_by_second()
-class NegativeNumberError(ValueError):
+def first_divided_by_second():
+    try:
+        first = float(input('Enter the first number: '))
+        second = float(input('Enter the second number: '))
+        result = first / second
+    except (ZeroDivisionError, ValueError) as e:
+        print(e)
+    else:
+        print(result)
+    finally:
+        print('End of the program.')
+
+# first_divided_by_second()
+
+class NegativeNumberError(Exception):
     pass
 
 def ask_for_number():
-    try:
-        number = float(input('Enter a number: '))
-    except ValueError as e:
-        print(e)
-    else:
-        if number < 0:
-            raise NegativeNumberError('Number must be positive!')
-        print(f'You entered {number}')
+    answer = input('Enter a number: ')
+    number = float(answer)
+    if number < 0:
+        raise NegativeNumberError('Number must be positive!')
+    print(f'You entered {number}!')
 
 # ask_for_number()
 
-# def return_inverse_of_list(a_list):
-#     try:
-#         return [1/n for n in a_list]
-#     except ZeroDivisionError as e:
-#         print(e)
-#     except TypeError as e:
-#         print(e)
-#     except:
-#         print('invalid element')
+def return_inverse_of_list_elements(a_list):
+    new_list = []
 
-def invert_numbers(numbers):
-    result = []
-    for num in numbers:
+    for element in a_list:
         try:
-            result.append(1 / num)
+            new_list.append(1/element)
         except ZeroDivisionError:
-            result.append(float('inf'))  # or handle as desired
+            print('Zero detected. Inverse coerced to infinity.')
+            new_list.append(float('inf'))
+        except TypeError:
+            print(f'Element {element} must be a float or int.')
+    print(new_list)
 
-    return result
+# return_inverse_of_list_elements([1, 'e', 3, 0])
 
-numbers = [1, 2, 0, 3, 4]
-print(invert_numbers(numbers))
-# [1.0, 0.5, inf, 0.3333333333333333, 0.25]
+students = {'John': 25, 'Jane': 22, 'Doe': 30}
+
+def get_age(name):
+    try:
+        return students[name]
+    except KeyError:
+        return('Student not found')
+
+# for student in students:
+#     print(get_age(student))
+
+# print(get_age('Jerome'))
+
+numbers = [1, 2, 3, 4, 5]
+
+def lbyl_6(numbers):
+    if len(numbers) >= 6:
+        return numbers[5]
+    print('Index 6 does not exist.')
+    
+def afnp_6(numbers):
+    try:
+        return numbers[5]
+    except IndexError:
+        print('Index 6 does not exist.')
+
+print(lbyl_6(numbers))
+print(afnp_6(numbers))
