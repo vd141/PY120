@@ -354,9 +354,11 @@ class TTTGame(PromptMixIn):
         '''
         STUB
         '''
-        self.board = Board()
+        self.board = self._initialize_board()
         self.player_score = 0
         self.computer_score = 0
+        self.p1 = None
+        self.p2 = None
 
     @property
     def player_score(self):
@@ -399,8 +401,8 @@ class TTTGame(PromptMixIn):
         self._clear_console()
         self._display_welcome_message()
         self._reading_seconds(2)
-        game_board = self._initialize_board()
-        game_board.print_template()
+        self._initialize_board()
+        self.board.print_template()
         self._reading_seconds(4)
         while True:
             self._play_a_game()
@@ -416,30 +418,30 @@ class TTTGame(PromptMixIn):
         self._clear_console()
 
     def _play_a_game(self):
-        p1, p2 = self._select_starter_random()
-        self._set_player_marker(p1, p2)
-        self._print_starting_players(p1, p2)
+        self._select_starter_random()
+        self._set_player_marker()
+        self._print_starting_players()
         self._reading_seconds(5)
-        game_board = self._initialize_board()
+        self._initialize_board()
 
-        while game_board.available_spaces:
-            p1_choice = p1.select_position(game_board, p2.positions)
-            game_board.update_playing_board(p1.marker, p1_choice)
+        while self.board.available_spaces:
+            p1_choice = self.p1.select_position(self.board, self.p2.positions)
+            self.board.update_playing_board(self.p1.marker, p1_choice)
             self._clear_console()
-            game_board.print_playing_board()
-            if self._is_winning_condition(p1):
-                self._tally_score(p1)
-                self._print_winner(p1)
+            self.board.print_playing_board()
+            if self._is_winning_condition(self.p1):
+                self._tally_score(self.p1)
+                self._print_winner(self.p1)
                 self._reading_seconds(2)
                 self._clear_console()
                 return
-            p2_choice = p2.select_position(game_board, p1.positions)
-            game_board.update_playing_board(p2.marker, p2_choice)
+            p2_choice = self.p2.select_position(self.board, self.p1.positions)
+            self.board.update_playing_board(self.p2.marker, p2_choice)
             self._clear_console()
-            game_board.print_playing_board()
-            if self._is_winning_condition(p2):
-                self._tally_score(p2)
-                self._print_winner(p2)
+            self.board.print_playing_board()
+            if self._is_winning_condition(self.p2):
+                self._tally_score(self.p2)
+                self._print_winner(self.p2)
                 self._reading_seconds(2)
                 self._clear_console()
                 return
@@ -473,24 +475,23 @@ class TTTGame(PromptMixIn):
         selects a human or computer instance as the p1/p2
         '''
         players = [Human(), Computer()]
-        first_player = random.choices(players)[0]
-        second_player = [player for player in players if
-                         player is not first_player][0]
-        return first_player, second_player
+        self.p1 = random.choices(players)[0]
+        self.p2 = [player for player in players if
+                         player is not self.p1][0]
 
-    def _set_player_marker(self, first_player, second_player):
-        first_player.marker, second_player.marker = self.PLAYER_ONE_MARKER, self.PLAYER_TWO_MARKER
+    def _set_player_marker(self):
+        self.p1.marker, self.p2.marker = self.PLAYER_ONE_MARKER, self.PLAYER_TWO_MARKER
 
-    def _print_starting_players(self, first_player, second_player):
-        print(self.prompt(f'Player 1 is {first_player.__class__.__name__}: '
-                          f'{first_player.marker}'))
+    def _print_starting_players(self):
+        print(self.prompt(f'Player 1 is {self.p1.__class__.__name__}: '
+                          f'{self.p1.marker}'))
         print(self.prompt('Player 2 is ',
-                          f'{second_player.__class__.__name__}: '
-                          f'{second_player.marker}'))
+                          f'{self.p2.__class__.__name__}: '
+                          f'{self.p2.marker}'))
         print(self.prompt('Player 1 will make the first move.'))
 
     def _initialize_board(self):
-        return Board()
+        self.board = Board()
 
     def _is_winning_condition(self, player):
         '''
