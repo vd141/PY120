@@ -183,13 +183,18 @@ class Opponent(PromptMixIn):
     '''
     TWENTY_ONE = 21
 
+    ACE_HIGH = 11
+
+    ACE_DIFFERENTIAL = 10
+
     def __init__(self):
         self.reset()
 
     def reset(self):
         self.hand = []
         self.hand_value = 0
-        self.has_ace = False
+        self.ace_count = 0
+        self.diminished_aces = 0
 
     @property
     def hand(self):
@@ -208,37 +213,64 @@ class Opponent(PromptMixIn):
         self._hand_value = new_value
 
     @property
-    def has_ace(self):
-        return self._has_ace
+    def ace_count(self):
+        return self._ace_count
 
-    @has_ace.setter
-    def has_ace(self, tf):
-        self._has_ace = tf
+    @ace_count.setter
+    def ace_count(self, new_count):
+        self._ace_count = new_count
+
+    @property
+    def diminished_aces(self):
+        return self._diminished_aces
+    
+    @diminished_aces.setter
+    def diminished_aces(self, new_dim_ace_count):
+        self._diminished_aces = new_dim_ace_count
 
     def add_to_hand(self, card):
         '''
         adds the card to hand and determines the new point value of hand
 
+        every time a card is added to the hand, reevaluate ace values
+
         determines if incoming card is ace. if so, latches has_ace to true
+
+        allow ace values to be as high as possible without busting
+
+        each ace has a nominal value of 11. if the sum of the values in the hand
+        exceeds 21, subtract 10 from each ace value until the total is under 21
+
+        if ace is 
         '''
         self.hand.append(card)
         self._determine_value(card)
 
     def _determine_value(self, card):
         card_value = card.value
-        if not self.has_ace and card_value == 'Ace':
-            self.has_ace = True
-            card_value = 11
-        elif card_value == 'Ace':
-            card_value = 1
+        if card_value == 'Ace':
+            self.ace_count += 1
+            card_value = Opponent.ACE_HIGH
         self.hand_value += card_value
+        self._recalculate_if_ace(card_value)
+
+    def _recalculate_if_ace(self, card_value):
+        if self.is_bust() and card_value == Opponent.ACE_HIGH:
+            for _ in range(self.ace_count - self.diminished_aces):
+                self.hand_value -= Opponent.ACE_DIFFERENTIAL
+                self.diminished_aces += 1
+                if not self.is_bust():
+                    break
 
     def display_full_hand(self):
         print(self.prompt(f'{self.__class__.__name__}\'s hand is: '
               f'{self.join_or([str(card) for card in self.hand], ', ', 'and')}.'))
 
-    def display_hand_value(self):
-        print(self.prompt(f'{self.__class__.__name__}\'s hand value is: {self.hand_value}.'))
+    def display_hand_value(self, prompt=True):
+        if prompt:
+            print(self.prompt(f'{self.__class__.__name__}\'s hand value is: {self.hand_value}.'))
+        else:
+            print(f' {self.__class__.__name__}\'s hand value is: {self.hand_value}.')
 
     def hit(self, card):
         print(self.prompt(f'{self.__class__.__name__} hits!'))
@@ -249,6 +281,9 @@ class Opponent(PromptMixIn):
 
     def is_bust(self):
         return self.hand_value > Opponent.TWENTY_ONE
+    
+    def _reading_pause_seconds(self, seconds):
+        time.sleep(seconds)
 
 class Dealer(Opponent):
     '''
@@ -257,20 +292,28 @@ class Dealer(Opponent):
 
     has a method to display one card
     '''
+    THRESHOLD = 17
+
     def strategy(self, deck):
         self.display_full_hand()
         self.display_hand_value()
+        self._reading_pause_seconds(5)
+        clear_screen()
         while True:
-            if self.hand_value < 17:
+            if self.hand_value < Dealer.THRESHOLD:
                 self.hit(deck.draw())
+                self._reading_pause_seconds(3)
                 self.display_full_hand()
                 self.display_hand_value()
                 self._reading_pause_seconds(3)
                 if self.is_bust():
                     print(self.prompt(f'{self.__class__.__name__} busts!'))
                     break
+                if self.hand_value < Dealer.THRESHOLD:
+                    clear_screen()
             else:
                 self.stay()
+                self._reading_pause_seconds(3)
                 break
 
     def show_one(self):
@@ -278,9 +321,6 @@ class Dealer(Opponent):
         displays first card in hand
         '''
         print(self.prompt(f'Dealer shows {self.hand[0]}.'))
-
-    def _reading_pause_seconds(self, seconds):
-        time.sleep(seconds)
 
 class Player(Opponent):
     '''
@@ -309,6 +349,7 @@ class Player(Opponent):
             decision = input(self.prompt('Do you want to (h)it or (s)tay? ')).lower()
             if decision in ['h', 's']:
                 if decision == 'h':
+                    clear_screen()
                     self.hit(deck.draw())
                     self.display_full_hand()
                     self.display_hand_value()
@@ -317,6 +358,8 @@ class Player(Opponent):
                         break
                 else:
                     self.stay()
+                    self._reading_pause_seconds(3)
+                    clear_screen()
                     break
             else:
                 print(self.prompt('Input must either be \'h\' or \'s\'!'))
@@ -408,7 +451,8 @@ class TwentyOne(PromptMixIn):
                 self._win_score()
             self.player.display_cash()
             self._reset_deck_and_hands()
-            self._reading_pause_seconds(3)
+            self._reading_pause_seconds(5)
+            self._query_next_game()
             clear_screen()
         self.player.display_cash_condition()
         self._goodbye_message()
@@ -447,6 +491,9 @@ class TwentyOne(PromptMixIn):
     def _reading_pause_seconds(self, seconds):
         time.sleep(seconds)
 
+    def _query_next_game(self):
+        input(self.prompt('Continued to the next game? Hit ENTER to continue. '))
+
     def _welcome_message(self):
         print(self.prompt('Welcome to Twenty-One!'))
 
@@ -455,3 +502,21 @@ class TwentyOne(PromptMixIn):
 
 game = TwentyOne()
 game.play()
+
+# testing ace calculation
+# test_deck = [Card('Ace of Spades', 'Ace'),
+#              Card('4 of Hearts', 4),
+#              Card('5 of Diamonds', 5),
+#              Card('Ace of Diamonds', 'Ace'),
+#              Card('Jack of Hearts', 10),
+#              Card('Ace of Clubs', 'Ace'),
+#              ]
+
+# test_op = Opponent()
+
+# for card in test_deck:
+#     print(test_op.is_bust())
+#     test_op._determine_value(card)
+#     print(test_op.hand_value)
+
+# print(test_op.is_bust())
