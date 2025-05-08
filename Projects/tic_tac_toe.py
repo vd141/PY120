@@ -102,12 +102,14 @@ class PromptMixIn:
             if len(iterable) <= 1:
                 output_str += str(iterable[0])
             elif len(iterable) == 2:
-                output_str += ' '.join([str(iterable[0]), final, str(iterable[1])])
+                output_str += ' '.join([str(iterable[0]), final,
+                                        str(iterable[1])])
             elif len(iterable) > 2:
                 for item in iterable[:-2]:
                     output_str += str(item)
                     output_str += separator
-                output_str += str(iterable[-2]) + separator + final + ' ' + str(iterable[-1])
+                output_str += str(str(iterable[-2]) + separator +
+                final + ' ' + str(iterable[-1]))
             return output_str
         except IndexError as e:
             print(f'Iterable must contain at least 1 element: {e}')
@@ -258,10 +260,12 @@ class Human(Player):
         while available:
             try:
                 choice = int(input(self.prompt('Please choose an available ',
-                                           f'position: {self.join_or(available)}: ')))
+                                           'position: ',
+                                           f'{self.join_or(available)}: ')))
                 if choice in available:
                     available.remove(choice)
-                    print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
+                    print(self.prompt(f'{self.__class__.__name__} '
+                                      f'selected {choice}.'))
                     self.positions.add(choice)
                     os.system('clear')
                     return choice
@@ -481,7 +485,8 @@ class TTTGame(PromptMixIn):
                          player is not self.p1][0]
 
     def _set_player_marker(self):
-        self.p1.marker, self.p2.marker = self.PLAYER_ONE_MARKER, self.PLAYER_TWO_MARKER
+        self.p1.marker, self.p2.marker = (self.PLAYER_ONE_MARKER,
+        self.PLAYER_TWO_MARKER)
 
     def _print_starting_players(self):
         print(self.prompt(f'Player 1 is {self.p1.__class__.__name__}: '
