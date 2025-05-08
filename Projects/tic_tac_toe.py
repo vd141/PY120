@@ -402,8 +402,6 @@ class TTTGame(PromptMixIn):
         self._display_welcome_message()
         self._reading_seconds(2)
         self._initialize_board()
-        self.board.print_template()
-        self._reading_seconds(4)
         while True:
             self._play_a_game()
             self._print_score()
@@ -418,6 +416,9 @@ class TTTGame(PromptMixIn):
         self._clear_console()
 
     def _play_a_game(self):
+        self._clear_console()
+        self.board.print_template()
+        self._reading_seconds(4)
         self._select_starter_random()
         self._set_player_marker()
         self._print_starting_players()
