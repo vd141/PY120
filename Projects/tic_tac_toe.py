@@ -113,6 +113,7 @@ class PromptMixIn:
             return output_str
         except IndexError as e:
             print(f'Iterable must contain at least 1 element: {e}')
+            return None
 
 # print(PromptMixIn().join_or([1, 2]))
 
@@ -132,15 +133,6 @@ class Board(PromptMixIn):
         '|  4  |  5  |  6  |',
         '+-----------------+',
         '|  7  |  8  |  9  |',
-        '+-----------------+'
-    ]
-    EMPTY_BOARD = [
-        '+-----------------+',
-        '|     |     |     |',
-        '+-----------------+',
-        '|     |     |     |',
-        '+-----------------+',
-        '|     |     |     |',
         '+-----------------+'
     ]
     CENTER = 5
@@ -250,7 +242,8 @@ class Human(Player):
     '''
     prompts user at CLI to enter an available position.
     '''
-    def select_position(self, board, opponent_positions=None):
+    def select_position(self, board, _opponent_positions,
+                        _winning_combos):
         '''
         prompts user to select an available position
 
@@ -271,6 +264,7 @@ class Human(Player):
                     return choice
             except ValueError as e:
                 print(self.prompt(f'{e}. Input must be an available integer!'))
+        return None
 
 class Computer(Player):
     '''
@@ -279,15 +273,17 @@ class Computer(Player):
 
     randomly selects from an available position
     '''
-    def select_position(self, board, opponent_positions):
+    def select_position(self, board, opponent_positions, winning_combos):
         available = board.available_spaces
         if available:
             print(self.prompt('Computer deciding...'))
             time.sleep(2)
-            choice = self._offensive_computer_move(available, self.positions)
+            choice = self._offensive_computer_move(available, self.positions,
+                                                   winning_combos)
             if not choice:
                 choice = self._defensive_computer_move(available,
-                                                      opponent_positions)
+                                                      opponent_positions,
+                                                      winning_combos)
             if not choice:
                 choice = self._pick_center(available)
             if not choice:
@@ -297,20 +293,23 @@ class Computer(Player):
             os.system('clear')
             print(self.prompt(f'{self.__class__.__name__} selected {choice}.'))
             return choice
+        return None
 
-    def _offensive_computer_move(self, available, self_positions):
-        return self._computer_ai_choice(available, self_positions)
+    def _offensive_computer_move(self, available, self_positions,
+                                 winning_combos):
+        return self._computer_ai_choice(available, self_positions,
+                                        winning_combos)
 
-    def _defensive_computer_move(self, available, opponent_positions):
-        return self._computer_ai_choice(available, opponent_positions)
+    def _defensive_computer_move(self, available, opponent_positions,
+                                 winning_combos):
+        return self._computer_ai_choice(available, opponent_positions,
+                                        winning_combos)
 
-    def _computer_ai_choice(self, available, current_positions):
+    def _computer_ai_choice(self, available, current_positions, winning_combos):
         '''
         feed opponent positions into current_positions for defensive strategy
         feed self's positions into current_positions for offensive strategy
         '''
-        winning_combos = TTTGame.WINNING_CONDITIONS
-
         for combo in winning_combos:
             intersection = combo.intersection(current_positions)
             if len(intersection) == 2:
@@ -340,6 +339,8 @@ class TTTGame(PromptMixIn):
             {7, 8, 9},
         ]
 
+    WINNING_SCORE = 3
+
     PLAYER_ONE_MARKER = 'O'
     PLAYER_TWO_MARKER = 'X'
     '''
@@ -358,7 +359,7 @@ class TTTGame(PromptMixIn):
         '''
         STUB
         '''
-        self.board = self._initialize_board()
+        self._initialize_board()
         self.player_score = 0
         self.computer_score = 0
         self.p1 = None
@@ -430,28 +431,28 @@ class TTTGame(PromptMixIn):
         self._initialize_board()
 
         while self.board.available_spaces:
-            p1_choice = self.p1.select_position(self.board, self.p2.positions)
-            self.board.update_playing_board(self.p1.marker, p1_choice)
-            self._clear_console()
-            self.board.print_playing_board()
-            if self._is_winning_condition(self.p1):
-                self._tally_score(self.p1)
-                self._print_winner(self.p1)
-                self._reading_seconds(2)
-                self._clear_console()
+            winner = self._handle_player_decision(self.p1, self.p2)
+            if winner:
                 return
-            p2_choice = self.p2.select_position(self.board, self.p1.positions)
-            self.board.update_playing_board(self.p2.marker, p2_choice)
-            self._clear_console()
-            self.board.print_playing_board()
-            if self._is_winning_condition(self.p2):
-                self._tally_score(self.p2)
-                self._print_winner(self.p2)
-                self._reading_seconds(2)
-                self._clear_console()
+            winner = self._handle_player_decision(self.p2, self.p1)
+            if winner:
                 return
 
         self._print_tie()
+
+    def _handle_player_decision(self, current_player, opponent):
+        player_choice = current_player.select_position(self.board, opponent.positions,
+                                            self.WINNING_CONDITIONS)
+        self.board.update_playing_board(current_player.marker, player_choice)
+        self._clear_console()
+        self.board.print_playing_board()
+        if self._is_winning_condition(current_player):
+            self._tally_score(current_player)
+            self._print_winner(current_player)
+            self._reading_seconds(2)
+            self._clear_console()
+            return True
+        return False
 
     def _play_another_game(self):
         while True:
@@ -533,9 +534,9 @@ class TTTGame(PromptMixIn):
         print('All moves exhausted. It\'s a tie!')
 
     def _best_of_three(self):
-        if self._player_score == 3:
+        if self._player_score == self.WINNING_SCORE:
             return 'Human'
-        if self._computer_score == 3:
+        if self._computer_score == self.WINNING_SCORE:
             return 'Computer'
         return None
 
