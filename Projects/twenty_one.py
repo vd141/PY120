@@ -98,12 +98,14 @@ class PromptMixIn:
             if len(iterable) <= 1:
                 output_str += str(iterable[0])
             elif len(iterable) == 2:
-                output_str += ' '.join([str(iterable[0]), final, str(iterable[1])])
+                output_str += ' '.join([str(iterable[0]),
+                                        final, str(iterable[1])])
             elif len(iterable) > 2:
                 for item in iterable[:-2]:
                     output_str += str(item)
                     output_str += separator
-                output_str += str(iterable[-2]) + separator + final + ' ' + str(iterable[-1])
+                output_str += str(str(iterable[-2]) + separator + final + ' '
+                                  + str(iterable[-1]))
             return output_str
         except IndexError as e:
             print(f'Iterable must contain at least 1 element: {e}')
@@ -223,7 +225,7 @@ class Opponent(PromptMixIn):
     @property
     def diminished_aces(self):
         return self._diminished_aces
-    
+
     @diminished_aces.setter
     def diminished_aces(self, new_dim_ace_count):
         self._diminished_aces = new_dim_ace_count
@@ -264,13 +266,16 @@ class Opponent(PromptMixIn):
 
     def display_full_hand(self):
         print(self.prompt(f'{self.__class__.__name__}\'s hand is: '
-              f'{self.join_or([str(card) for card in self.hand], ', ', 'and')}.'))
+              f'{self.join_or([str(card) for card in
+                               self.hand], ', ', 'and')}.'))
 
     def display_hand_value(self, prompt=True):
         if prompt:
-            print(self.prompt(f'{self.__class__.__name__}\'s hand value is: {self.hand_value}.'))
+            print(self.prompt(f'{self.__class__.__name__}\'s hand value is: ',
+                              f'{self.hand_value}.'))
         else:
-            print(f' {self.__class__.__name__}\'s hand value is: {self.hand_value}.')
+            print(f' {self.__class__.__name__}\'s hand value is: ',
+                  f'{self.hand_value}.')
 
     def hit(self, card):
         print(self.prompt(f'{self.__class__.__name__} hits!'))
@@ -281,7 +286,7 @@ class Opponent(PromptMixIn):
 
     def is_bust(self):
         return self.hand_value > Opponent.TWENTY_ONE
-    
+
     def _reading_pause_seconds(self, seconds):
         time.sleep(seconds)
 
@@ -336,33 +341,47 @@ class Player(Opponent):
         '''
         shows player hand and value of hand
 
-        asks if player wants to hit or stay. continues asking until player stays or busts
+        asks if player wants to hit or stay. continues asking until player stays
+        or busts
 
         player can enter h or s to hit or stay
         '''
         self.display_full_hand()
         self.display_hand_value()
-        self.hit_or_stay(deck)
+        self.player_makes_choice(deck)
 
-    def hit_or_stay(self, deck):
+    def player_makes_choice(self, deck):
         while True:
-            decision = input(self.prompt('Do you want to (h)it or (s)tay? ')).lower()
-            if decision in ['h', 's']:
-                if decision == 'h':
-                    clear_screen()
-                    self.hit(deck.draw())
-                    self.display_full_hand()
-                    self.display_hand_value()
-                    if self.is_bust():
-                        print(self.prompt(f'{self.__class__.__name__} busts!'))
-                        break
-                else:
-                    self.stay()
-                    self._reading_pause_seconds(3)
-                    clear_screen()
+            decision = self._valid_hit_or_stay()
+            if decision == 'h':
+                if not self._hit_orchestration_no_bust(deck):
                     break
             else:
-                print(self.prompt('Input must either be \'h\' or \'s\'!'))
+                self._stay_orchestration()
+                break
+
+    def _valid_hit_or_stay(self):
+        while True:
+            decision = input(self.prompt('Do you want to',
+                                         ' (h)it or (s)tay? ')).lower()
+            if decision in ['h', 's']:
+                return decision
+            print(self.prompt('Input must either be \'h\' or \'s\'!'))
+
+    def _hit_orchestration_no_bust(self, deck):
+        clear_screen()
+        self.hit(deck.draw())
+        self.display_full_hand()
+        self.display_hand_value()
+        if self.is_bust():
+            print(self.prompt(f'{self.__class__.__name__} busts!'))
+            return False
+        return True
+
+    def _stay_orchestration(self):
+        self.stay()
+        self._reading_pause_seconds(3)
+        clear_screen()
 
     def is_rich(self):
         return self.cash >= 10
@@ -442,9 +461,7 @@ class TwentyOne(PromptMixIn):
         while not (self.player.is_broke() or self.player.is_rich()):
             self._deal_cards()
             self.dealer.show_one()
-            self.player.display_full_hand()
-            self.player.display_hand_value()
-            self.player.hit_or_stay(self.deck)
+            self.player.strategy(self.deck)
             if not self.player.is_bust():
                 self.dealer.strategy(self.deck)
             if not self._win_if_bust():
@@ -492,7 +509,8 @@ class TwentyOne(PromptMixIn):
         time.sleep(seconds)
 
     def _query_next_game(self):
-        input(self.prompt('Continued to the next game? Hit ENTER to continue. '))
+        input(self.prompt('Continued to the next game? ',
+                          'Hit ENTER to continue. '))
 
     def _welcome_message(self):
         print(self.prompt('Welcome to Twenty-One!'))
