@@ -104,14 +104,14 @@ class Player:
                'lizard': Lizard(),
                'spock': Spock(),
                }
-    
+
     ABBREVIATIONS = {'r': 'rock',
                      'p': 'paper',
                      'sc': 'scissors',
                      'l': 'lizard',
                      'sp': 'spock',
                      }
-    
+
     CHOICES_FORMAT = ['(r)ock',
                       '(p)aper',
                       '(sc)issors',
@@ -169,6 +169,12 @@ class Player:
         '''
         self._score = new_score
 
+    def track_human_history(self, _):
+        '''
+        dummy method (overriden by Daneel class)
+        '''
+        pass
+
 
 class Computer(Player):
     '''
@@ -198,13 +204,16 @@ class HAL(Player):
     '''
     tends to choose scissors more than others
     '''
+    SCISSOR_WEIGHT = 5
+    OTHER_WEIGHT = 1
 
     def choose(self):
         '''
         weight scissors 5, all others 1 (random.choices normalizes weights)
         '''
 
-        weights = [5 if isinstance(choice, Scissors) else 1 for choice in
+        weights = [HAL.SCISSOR_WEIGHT if isinstance(choice, Scissors) else
+                   HAL.OTHER_WEIGHT for choice in
                    Player.CHOICES.values()]
 
         self.move = random.choices(list(Player.CHOICES.values()),
@@ -286,12 +295,8 @@ class RPSGame:
             print('Invalid selection. ', end='')
 
         self._computer = RPSGame.AVAILABLE_PLAYERS[user_selection]
-        self._reference_player_history_if_daneel()
+        self._computer.track_human_history(self._human.move_history)
         print(f'Your opponent is: {type(self._computer).__name__}')
-
-    def _reference_player_history_if_daneel(self):
-        if isinstance(self._computer, Daneel):
-            self._computer.track_human_history(self._human.move_history)
 
     def _display_goodbye_message(self):
         print('Thanks for playing Rock Paper Scissors. Goodbye!')
@@ -331,6 +336,7 @@ class RPSGame:
         if type(human_move) in computer_move.victims:
             self._computer.score += 1
             return self._computer
+        return None
 
     def _play_again(self):
         prompt = 'Would you like to play again? y/n: '
@@ -356,65 +362,3 @@ class RPSGame:
 
 
 RPSGame().play()
-
-'''
-Keeping score: class or state?
-    - a score doesn't need to do anything.
-    - we just need to access the score to display it, update it after each round
-      and check it when deciding to end the game
-    - each player has its own score -> we can make the score an attribute of the
-      player class
-'''
-
-'''
-Adding lizard and spock:
-    - add to the player class
-    - need to update winning logic
-    - 
-'''
-
-'''
-Player holds an instance of each possible choice class in the tuple
-
-
-add a move parent class
-and each possible move is a subclass of the move parent
-each move has a victim. victims are stored as move states
-each move has weaknesses. weaknesses are stored as move states
-
-for each subclass, the compare method checks if the other class being compared
-is a victim. if it is, return True. else, return false. but a move isn't doing the
-comparing. thhe game is. so let the game handle the comparison
-    - game comparison compares the moves of the two players
-    - if type of human choice is a victim of computer choice, computer wins and vice versa
-    - if types of both choices are the same, it's a tie
-
-    - can we compare types without creating an instance of a type? yes, by using
-    isinstance
-
-player selects a string, code will select corresponding Move instance
-
-converting moves to separate classes required updating the code in several places. but
-the code looks more readable/organized. introducing a new move would require updates
-to the Human.choose() method. But otherwise, no changes are needed
-'''
-
-'''
-keep track of a history of moves
-
-use a list to keep track of each player's moves. the record can be an attribute
-of the player class. updates to the move attribute will be added to the list.
-
-when the move setter is invoked, update move history
-'''
-
-'''
-computer personalities
-
-R2D2 always chooses rock
-HAL tends to choose scissors more often than others
-Daneel always chooses your previous move (first move is random)
-
-it makes more sense to make the additional robots subclasses of player rather
-than computer because computer is definied solely by its ability to choose randomly
-'''
